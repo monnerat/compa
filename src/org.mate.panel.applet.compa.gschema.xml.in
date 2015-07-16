@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="@GETTEXT_PACKAGE@">
+	<enum id="org.mate.panel.applet.compa.FrameType">
+		<value nick="None" value="0" />
+		<value nick="In" value="1" />
+		<value nick="Out" value="2" />
+		<value nick="Etched in" value="3" />
+		<value nick="Etched out" value="4" />
+	</enum>
+	<schema id="org.mate.panel.applet.compa">
+		<key name="monitor-command" type="s">
+			<default>''</default>
+			<summary>Monitor command</summary>
+			<description>Command producing text for the applet area</description>
+		</key>
+		<key name="update-interval" type="i">
+			<default>60</default>
+			<summary>Update interval (sec)</summary>
+			<description>Automatic update interval in seconds for the applet area</description>
+		</key>
+		<key name="tooltip-command" type="s">
+			<default>''</default>
+			<summary>Tooltip command</summary>
+			<description>Command producing text for the tootip</description>
+		</key>
+		<key name="click-command" type="s">
+			<default>''</default>
+			<summary>Click command</summary>
+			<description>Command to be executed by clicking the applet</description>
+		</key>
+		<key name="frame-type" enum="org.mate.panel.applet.compa.FrameType">
+			<default>'None'</default>
+			<summary>Embossing</summary>
+			<description>Applet area shadow type</description>
+		</key>
+		<key name="label-color" type="s">
+			<default>'#000000'</default>
+			<summary>Background color</summary>
+			<description>Applet area background color</description>
+		</key>
+		<key name="padding" type="i">
+			<default>0</default>
+			<summary>Padding</summary>
+			<description>Applet area left and right padding (#pixels)</description>
+		</key>
+		<key name="use-color" type="b">
+			<default>false</default>
+			<summary>Use background color</summary>
+			<description>Paint applet area background</description>
+		</key>
+	</schema>
+</schemalist>

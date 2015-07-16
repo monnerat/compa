@@ -1,0 +1,129 @@
+# French texts for the compa panel applet.
+# Copyright (C) 2015 Patrick Monnerat
+# This file is distributed under the same license as the compa package.
+# Patrick Monnerat, 2015.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: compa 0.99\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-07-16 17:14+0200\n"
+"PO-Revision-Date: 2015-07-15 18:25+0200\n"
+"Last-Translator: Patrick Monnerat\n"
+"Language-Team: French <LL@li.org>\n"
+"Language: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Applet area background color"
+msgstr "Couleur de fond de l'appliquette"
+
+msgid "Applet area left and right padding (#pixels)"
+msgstr "Largeur des marges latérales de l'appliquette (#pixels)"
+
+msgid "Applet area shadow type"
+msgstr "Type d'ombre de la zone de l'appliquette"
+
+msgid "Automatic update interval in seconds for the applet area"
+msgstr "Période en secondes de la mise à jour automatique de l'affichage"
+
+msgid "Background color"
+msgstr "Couleur de fond"
+
+msgid "Browse"
+msgstr "Naviguer"
+
+msgid "Click action: "
+msgstr "Action sur clic: "
+
+msgid "Click command"
+msgstr "Commande à exécuter"
+
+msgid "Command Output Monitor Panel Applet"
+msgstr "Appliquette de surveillance de sortie de commande"
+
+msgid "Command producing text for the applet area"
+msgstr "Commande produisant le texte pour la zone de l'appliquette"
+
+msgid "Command producing text for the tootip"
+msgstr "Commande produisant le texte pour l'infobulle"
+
+msgid "Command to be executed by clicking the applet"
+msgstr "Commande à exécuter quand l'appliquette est cliquée"
+
+msgid "Compa Applet Actions"
+msgstr "Actions sur l'appliquette Compa"
+
+msgid "Configure"
+msgstr "Configurer"
+
+msgid "Embossing"
+msgstr "Gaufrage"
+
+msgid "Etched in"
+msgstr "Bord en creux"
+
+msgid "Etched out"
+msgstr "Bord en bosse"
+
+msgid "In"
+msgstr "En creux"
+
+msgid "Interval (seconds): "
+msgstr "Période (#secondes): "
+
+msgid "Label background: "
+msgstr "Couleur de fond"
+
+msgid "Monitor command"
+msgstr "Commande à surveiller"
+
+msgid "Monitor command: "
+msgstr "Commande à surveiller: "
+
+msgid "None"
+msgstr "Aucun"
+
+msgid "Out"
+msgstr "En bosse"
+
+msgid "Padding"
+msgstr "Remplissage"
+
+msgid "Padding: "
+msgstr "Remplissage: "
+
+msgid "Paint applet area background"
+msgstr "Peindre le fond de la zone d'appliquette"
+
+msgid "Select command"
+msgstr "Sélectionner une commande"
+
+msgid "Shadow type: "
+msgstr "Type de gaufrage"
+
+msgid "Tooltip command"
+msgstr "Commande d'infobulle"
+
+msgid "Tooltip command: "
+msgstr "Commande d'infobulle: "
+
+msgid "Update interval (sec)"
+msgstr "Période de mise à jour (sec)"
+
+msgid "Use background color"
+msgstr "Utiliser la couleur de fond"
+
+msgid "_About"
+msgstr "_A propos"
+
+msgid "_Configure"
+msgstr "_Configurer"
+
+msgid "_Update now"
+msgstr "_Mettre à jour maintenant"
+
+msgid "translator-credits"
+msgstr "Patrick Monnerat (Français)"

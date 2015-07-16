@@ -1,0 +1,16 @@
+[Applet Factory]
+Id=compaAppletFactory
+InProcess=false
+Location=@PANELLIBEXECDIR@/compa-applet
+Name=Compa applet Factory
+Name[fr]=Fabrique d'appliquette compa
+Description=Command Output Monitor Panel Applet factory
+Description[fr]=Fabrique d'appliquette de surveillance de sortie de commande
+
+[compaApplet]
+Name=Compa
+Name[fr]=Compa
+Description=Command Output Monitor Panel Applet
+Description[fr]=Appliquette de surveillance de sortie de commande
+Icon=compa
+MateComponentId=OAFIID:compaApplet

@@ -1,0 +1,39 @@
+                    !!! Compa is now a Mate panel applet !!!
+
+Originally designed by Ofer Kashayov for the obsolete Gnome 2 desktop, compa
+has been adapted to the Mate desktop panel.
+
+Compa is a Mate Panel Applet that can display the output of any system command
+on the panel.
+
+In addition it is able to show the output of a different command in its
+tooltip, and launch another command when clicked.
+
+Compa text style can be modified using Text Attribute Markup Language
+(http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html). 
+
+
+Build an installation tarball from a git clone.
+
+1. $ git clone https://github.com/monnerat/compa.git
+2. $ cd compa
+3. $ ./autogen.sh --prefix=/usr
+4. $ make dist
+
+Then find the tarball compa-*.tar.gz in the current directory.
+
+
+Installation from a distribution tarball:
+
+1. Download, gunzip and untar
+2. $ cd compa-*
+3. $ ./configure --prefix=/usr/
+4. $ make
+5. $ sudo make install
+6. Restart Mate
+7. Add to panel
+
+
+Building an rpm package from a distribution tarball.
+
+1. rpmbuild -ta compa-*.tar.gz

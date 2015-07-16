@@ -1,0 +1,14 @@
+Some tips for hacking/debugging the applets:
+
+1) The Panel Applet Writer's Reference Manual, including the MatePanelApplet
+   library documentation, can be found in mate-panel/doc/reference/panel-applet
+   (source). It is not completely up to date, but it covers the basics of
+   writing an applet.
+
+2) Look at the other applet implementations. One of the simpler applets is
+   the fish applet, which lives in mate-panel/applets/fish.
+
+3) Be weary of static, global variables if you plan to allow the user
+   to be able to add multiple instances of the applet. Each instance will
+   share the static varible. This is described in the debugging article, under
+   "Other considerations".

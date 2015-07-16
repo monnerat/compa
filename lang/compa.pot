@@ -1,0 +1,129 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Patrick Monnerat
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: compa 0.99\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-07-16 17:37+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Applet area background color"
+msgstr ""
+
+msgid "Applet area left and right padding (#pixels)"
+msgstr ""
+
+msgid "Applet area shadow type"
+msgstr ""
+
+msgid "Automatic update interval in seconds for the applet area"
+msgstr ""
+
+msgid "Background color"
+msgstr ""
+
+msgid "Browse"
+msgstr ""
+
+msgid "Click action: "
+msgstr ""
+
+msgid "Click command"
+msgstr ""
+
+msgid "Command Output Monitor Panel Applet"
+msgstr ""
+
+msgid "Command producing text for the applet area"
+msgstr ""
+
+msgid "Command producing text for the tootip"
+msgstr ""
+
+msgid "Command to be executed by clicking the applet"
+msgstr ""
+
+msgid "Compa Applet Actions"
+msgstr ""
+
+msgid "Configure"
+msgstr ""
+
+msgid "Embossing"
+msgstr ""
+
+msgid "Etched in"
+msgstr ""
+
+msgid "Etched out"
+msgstr ""
+
+msgid "In"
+msgstr ""
+
+msgid "Interval (seconds): "
+msgstr ""
+
+msgid "Label background: "
+msgstr ""
+
+msgid "Monitor command"
+msgstr ""
+
+msgid "Monitor command: "
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Out"
+msgstr ""
+
+msgid "Padding"
+msgstr ""
+
+msgid "Padding: "
+msgstr ""
+
+msgid "Paint applet area background"
+msgstr ""
+
+msgid "Select command"
+msgstr ""
+
+msgid "Shadow type: "
+msgstr ""
+
+msgid "Tooltip command"
+msgstr ""
+
+msgid "Tooltip command: "
+msgstr ""
+
+msgid "Update interval (sec)"
+msgstr ""
+
+msgid "Use background color"
+msgstr ""
+
+msgid "_About"
+msgstr ""
+
+msgid "_Configure"
+msgstr ""
+
+msgid "_Update now"
+msgstr ""
+
+msgid "translator-credits"
+msgstr ""
