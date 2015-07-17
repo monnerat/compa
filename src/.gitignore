@@ -12,6 +12,7 @@
 *.o
 *.class
 *.pyc
+*.pyo
 *.plugin
 Makefile
 Makefile.in

@@ -204,7 +204,7 @@ compa_update(compa_data_inst * compa_data)
 		int i;
 
 		if ((cmd_pipe = popen(compa_data->monitor_cmd, "r"))) {
-			for (i = 0; i <= 256; i++) {
+			for (i = 0; i < sizeof monitor_cmd_out - 1; i++) {
 				pipe_char = getc(cmd_pipe);
 
 				if (pipe_char == EOF)
@@ -213,11 +213,12 @@ compa_update(compa_data_inst * compa_data)
 				monitor_cmd_out[i] = pipe_char;
 				}
 
-			if (monitor_cmd_out[i - 1] == '\n')
-				monitor_cmd_out[i - 1] = 0;
-			else
-				monitor_cmd_out[i] = 0;
+			while (i--)
+				if (monitor_cmd_out[i] != '\n' &&
+				    monitor_cmd_out[i] != '\r')
+					break;
 
+			monitor_cmd_out[i + 1] = '\0';
 			(void) pclose(cmd_pipe);
 			}
 

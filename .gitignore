@@ -15,6 +15,7 @@
 *.o
 *.class
 *.pyc
+*.pyo
 aclocal.m4
 autom4te.cache
 config.h

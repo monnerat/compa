@@ -1,0 +1,6 @@
+*.mo
+.*swp
+.caja-metafile.xml
+*.autosave
+*.bak
+*~
