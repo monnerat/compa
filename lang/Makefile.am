@@ -6,13 +6,14 @@ MOFILES			=	${LINGUAS:%=%.mo}
 LANG_C_FILES		=	../src/main.c
 
 LANG_GSETTINGS_FILES	=	../src/org.mate.panel.applet.compa.gschema.xml
+LANG_GSETTINGS_FILES_IN	=	${LANG_GSETTINGS_FILES:%=%.in}
 
 noinst_DATA		=	$(MOFILES)
 
 EXTRA_DIST		=	compa.pot $(POFILES)
 
 
-compa.pot:	$(LANG_C_FILES) $(LANG_GSETTINGS_FILES)
+compa.pot:	$(LANG_C_FILES) $(LANG_GSETTINGS_FILES_IN)
 	> compa.pot
 	rm -rf tmp
 	intltool-extract -l --type=gettext/gsettings $(LANG_GSETTINGS_FILES)

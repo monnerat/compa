@@ -12,6 +12,11 @@ BuildRequires:	mate-panel-devel
 BuildRequires:	dbus-devel
 BuildRequires:	intltool
 
+#	Needed when the tarball is an SCM snapshot.
+BuildRequires:	autoconf
+BuildRequires:	automake
+
+
 %description
   This is a Mate Panel Applet that can display the output of any
 system command on the panel.
@@ -26,13 +31,14 @@ tool-tip, and launch a different command when clicked.
 %prep
 #-------------------------------------------------------------------------------
 
-%setup -q -n compa-%{version}
+%setup -q
 
 
 #-------------------------------------------------------------------------------
 %build
 #-------------------------------------------------------------------------------
 
+[ -f configure ] || ./autogen.sh
 %configure
 make %{?_smp_mflags}
 
