@@ -1,7 +1,7 @@
 /*
  * compa - Command Output Monitor Panel Applet
  * Copyright (C) 2010-2014 Ofer Kashayov <oferkv@gmail.com>
- * Copyright (C) 2015 Patrick Monnerat <pm@datasphere.ch>
+ * Copyright (C) 2015-2016 Patrick Monnerat <patrick@monnerat.net>
  *
  * compa is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -408,15 +408,18 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 	/* Combos. */
 
-	frame_type_comb = gtk_combo_box_new_text();
+	frame_type_comb = gtk_combo_box_text_new();
 	frame_type_alig = gtk_alignment_new(0, 0, 0, 0);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(frame_type_comb), _("None"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(frame_type_comb), _("In"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(frame_type_comb), _("Out"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(frame_type_comb),
-				  _("Etched in"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(frame_type_comb),
-				  _("Etched out"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
+				       _("None"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
+				       _("In"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
+				       _("Out"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
+				       _("Etched in"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
+				       _("Etched out"));
 	gtk_container_add(GTK_CONTAINER(frame_type_alig), frame_type_comb);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(frame_type_comb),
 				 compa_data->frame_type);
