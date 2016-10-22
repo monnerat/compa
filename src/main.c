@@ -63,6 +63,16 @@ typedef struct {
 }		compa_data_inst;
 
 
+#if GTK_MAJOR_VERSION < 3
+#define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
+		gtk_misc_set_alignment(GTK_MISC(label), (xalign), (yalign))
+#else
+#define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
+		(gtk_label_set_xalign(GTK_LABEL(label), (xalign)),	\
+		 gtk_label_set_yalign(GTK_LABEL(label), (yalign)))
+#endif
+
+
 /*
  *  Action click
  */
@@ -352,12 +362,12 @@ config_dialog(GtkAction * action, gpointer user_data)
 	action_lab = gtk_label_new(_("Click action: "));
 	frame_type_lab = gtk_label_new(_("Shadow type: "));
 	padding_lab = gtk_label_new(_("Padding: "));
-	gtk_misc_set_alignment(GTK_MISC(monitor_lab), 0.0, 1.0);
-	gtk_misc_set_alignment(GTK_MISC(interval_lab), 0.0, 1.0);
-	gtk_misc_set_alignment(GTK_MISC(tooltip_lab), 0.0, 1.0);
-	gtk_misc_set_alignment(GTK_MISC(action_lab), 0.0, 1.0);
-	gtk_misc_set_alignment(GTK_MISC(frame_type_lab), 0.0, 1.0);
-	gtk_misc_set_alignment(GTK_MISC(padding_lab), 0.0, 1.0);
+	COMPA_LABEL_ALIGN(monitor_lab, 0.0, 1.0);
+	COMPA_LABEL_ALIGN(interval_lab, 0.0, 1.0);
+	COMPA_LABEL_ALIGN(tooltip_lab, 0.0, 1.0);
+	COMPA_LABEL_ALIGN(action_lab, 0.0, 1.0);
+	COMPA_LABEL_ALIGN(frame_type_lab, 0.0, 1.0);
+	COMPA_LABEL_ALIGN(padding_lab, 0.0, 1.0);
 
 	/* Check button. */
 
