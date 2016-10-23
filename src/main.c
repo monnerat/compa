@@ -66,10 +66,27 @@ typedef struct {
 #if GTK_MAJOR_VERSION < 3
 #define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
 		gtk_misc_set_alignment(GTK_MISC(label), (xalign), (yalign))
+#define COMPA_TABLE_NEW(rows, columns)					\
+		gtk_table_new((rows), (columns), FALSE)
+#define COMPA_TABLE_ATTACH(table, child, left, top)			\
+		gtk_table_attach(GTK_TABLE(table), (child),		\
+				 (left), (left) + 1, (top), (top) + 1,	\
+				 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2)
 #else
 #define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
 		(gtk_label_set_xalign(GTK_LABEL(label), (xalign)),	\
 		 gtk_label_set_yalign(GTK_LABEL(label), (yalign)))
+#define COMPA_TABLE_NEW(rows, columns)					\
+		gtk_grid_new()
+#define COMPA_TABLE_ATTACH(table, child, left, top)			\
+		gtk_widget_set_margin_start((child), 2),		\
+		gtk_widget_set_margin_end((child), 2),			\
+		gtk_widget_set_margin_top((child), 2),			\
+		gtk_widget_set_margin_bottom((child), 2),		\
+		gtk_widget_set_hexpand((child), TRUE),			\
+		gtk_widget_set_vexpand((child), FALSE),			\
+		gtk_grid_attach(GTK_GRID(table), (child),		\
+				(left), (top), 1, 1)
 #endif
 
 
@@ -362,12 +379,12 @@ config_dialog(GtkAction * action, gpointer user_data)
 	action_lab = gtk_label_new(_("Click action: "));
 	frame_type_lab = gtk_label_new(_("Shadow type: "));
 	padding_lab = gtk_label_new(_("Padding: "));
-	COMPA_LABEL_ALIGN(monitor_lab, 0.0, 1.0);
-	COMPA_LABEL_ALIGN(interval_lab, 0.0, 1.0);
-	COMPA_LABEL_ALIGN(tooltip_lab, 0.0, 1.0);
-	COMPA_LABEL_ALIGN(action_lab, 0.0, 1.0);
-	COMPA_LABEL_ALIGN(frame_type_lab, 0.0, 1.0);
-	COMPA_LABEL_ALIGN(padding_lab, 0.0, 1.0);
+	COMPA_LABEL_ALIGN(monitor_lab, 0.0, 0.5);
+	COMPA_LABEL_ALIGN(interval_lab, 0.0, 0.5);
+	COMPA_LABEL_ALIGN(tooltip_lab, 0.0, 0.5);
+	COMPA_LABEL_ALIGN(action_lab, 0.0, 0.5);
+	COMPA_LABEL_ALIGN(frame_type_lab, 0.0, 0.5);
+	COMPA_LABEL_ALIGN(padding_lab, 0.0, 0.5);
 
 	/* Check button. */
 
@@ -452,64 +469,47 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 	/* Table. */
 
-	conf_table = gtk_table_new(7, 3, FALSE);
+	conf_table = COMPA_TABLE_NEW(7, 3);
 	frame_alig = gtk_alignment_new(0, 0, 0, 0);
 	gtk_alignment_set_padding(GTK_ALIGNMENT(frame_alig), 5, 5, 5, 5);
 
 	/* Monitor command settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), monitor_lab, 0, 1, 0, 1,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), monitor_ent, 1, 2, 0, 1,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), monitor_browse_but, 2, 3, 0, 1,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, monitor_lab, 0, 0);
+	COMPA_TABLE_ATTACH(conf_table, monitor_ent, 1, 0);
+	COMPA_TABLE_ATTACH(conf_table, monitor_browse_but, 2, 0);
 
 	/* Interval settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), interval_lab, 0, 1, 1, 2,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), interval_alig, 1, 2, 1, 2,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, interval_lab, 0, 1);
+	COMPA_TABLE_ATTACH(conf_table, interval_alig, 1, 1);
 
 	/* Frame settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), frame_type_lab, 0, 1, 2, 3,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), frame_type_alig, 1, 2, 2, 3,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, frame_type_lab, 0, 2);
+	COMPA_TABLE_ATTACH(conf_table, frame_type_alig, 1, 2);
 
 	/* Padding settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), padding_lab, 0, 1, 3, 4,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 0, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), padding_alig, 1, 2, 3, 4,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, padding_lab, 0, 3);
+	COMPA_TABLE_ATTACH(conf_table, padding_alig, 1, 3);
 
 	/* Color settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), col_check, 0, 1, 4, 5,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), label_col_alig, 1, 2, 4, 5,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, col_check, 0, 4);
+	COMPA_TABLE_ATTACH(conf_table, label_col_alig, 1, 4);
 
 	/* Tooltip settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), tooltip_lab, 0, 1, 5, 6,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), tooltip_ent, 1, 2, 5, 6,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), tooltip_browse_but, 2, 3, 5, 6,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, tooltip_lab, 0, 5);
+	COMPA_TABLE_ATTACH(conf_table, tooltip_ent, 1, 5);
+	COMPA_TABLE_ATTACH(conf_table, tooltip_browse_but, 2, 5);
 
 	/* Action settings. */
 
-	gtk_table_attach(GTK_TABLE(conf_table), action_lab, 0, 1, 6, 7,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), action_ent, 1, 2, 6, 7,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
-	gtk_table_attach(GTK_TABLE(conf_table), action_browse_but, 2, 3, 6, 7,
-			 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2);
+	COMPA_TABLE_ATTACH(conf_table, action_lab, 0, 6);
+	COMPA_TABLE_ATTACH(conf_table, action_ent, 1, 6);
+	COMPA_TABLE_ATTACH(conf_table, action_browse_but, 2, 6);
 
 	/* Display dialog. */
 
