@@ -289,9 +289,9 @@ select_command(GtkWidget * text_ent)
 
 	dialog = gtk_file_chooser_dialog_new(_("Select command"), NULL,
 					     GTK_FILE_CHOOSER_ACTION_OPEN,
-					     GTK_STOCK_CANCEL,
+					     _("_Cancel"),
 					     GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_OPEN,
+					     _("_Open"),
 					     GTK_RESPONSE_ACCEPT,
 					     NULL);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog),
@@ -362,9 +362,9 @@ config_dialog(GtkAction * action, gpointer user_data)
 	compa_data->conf_dialog =
 	    gtk_dialog_new_with_buttons(_("Configure"), NULL,
 					GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_STOCK_CANCEL,
+					_("_Cancel"),
 					GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK,
+					_("_OK"),
 					GTK_RESPONSE_OK,
 					NULL);
 	g_signal_connect_swapped(compa_data->conf_dialog, "response",
