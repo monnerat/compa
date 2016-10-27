@@ -1,6 +1,6 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Patrick Monnerat
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) 2016 Patrick Monnerat
+# This file is distributed under the same license as the compa package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: compa 0.99\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-16 17:37+0200\n"
+"POT-Creation-Date: 2016-10-27 15:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,7 +119,16 @@ msgstr ""
 msgid "_About"
 msgstr ""
 
+msgid "_Cancel"
+msgstr ""
+
 msgid "_Configure"
+msgstr ""
+
+msgid "_OK"
+msgstr ""
+
+msgid "_Open"
 msgstr ""
 
 msgid "_Update now"
