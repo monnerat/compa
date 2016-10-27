@@ -72,6 +72,12 @@ typedef struct {
 		gtk_table_attach(GTK_TABLE(table), (child),		\
 				 (left), (left) + 1, (top), (top) + 1,	\
 				 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2)
+#define COMPA_NO_STRETCH(align, widget)					\
+		*(align) = gtk_alignment_new(0, 0, 0, 0),		\
+		gtk_container_add(GTK_CONTAINER(*(align)), (widget))
+#define COMPA_ALIGNMENT_SET_PADDING(widget, top, bottom, left, right)	\
+		gtk_alignment_set_padding(GTK_ALIGNMENT(widget), (top),	\
+					  (bottom), (left), (right))
 #else
 #define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
 		(gtk_label_set_xalign(GTK_LABEL(label), (xalign)),	\
@@ -87,6 +93,15 @@ typedef struct {
 		gtk_widget_set_vexpand((child), FALSE),			\
 		gtk_grid_attach(GTK_GRID(table), (child),		\
 				(left), (top), 1, 1)
+#define COMPA_NO_STRETCH(align, widget)					\
+		gtk_widget_set_halign((widget), GTK_ALIGN_START),	\
+		gtk_widget_set_valign((widget), GTK_ALIGN_START),	\
+		*(align) = (widget)
+#define COMPA_ALIGNMENT_SET_PADDING(widget, top, bottom, left, right)	\
+		gtk_widget_set_margin_top((widget), (top)),		\
+		gtk_widget_set_margin_bottom((widget), (bottom)),	\
+		gtk_widget_set_margin_start((widget), (left)),		\
+		gtk_widget_set_margin_end((widget), (right))
 #endif
 
 
@@ -412,10 +427,8 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 	interval_spin = gtk_spin_button_new_with_range(1, 86400, 1);
 	padding_spin = gtk_spin_button_new_with_range(0, 10, 1);
-	interval_alig = gtk_alignment_new(0, 0, 0, 0);
-	padding_alig = gtk_alignment_new(0, 0, 0, 0);
-	gtk_container_add(GTK_CONTAINER(interval_alig), interval_spin);
-	gtk_container_add(GTK_CONTAINER(padding_alig), padding_spin);
+	COMPA_NO_STRETCH(&interval_alig, interval_spin);
+	COMPA_NO_STRETCH(&padding_alig, padding_spin);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(interval_spin),
 				  compa_data->update_int);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(padding_spin),
@@ -436,7 +449,6 @@ config_dialog(GtkAction * action, gpointer user_data)
 	/* Combos. */
 
 	frame_type_comb = gtk_combo_box_text_new();
-	frame_type_alig = gtk_alignment_new(0, 0, 0, 0);
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
 				       _("None"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
@@ -447,15 +459,14 @@ config_dialog(GtkAction * action, gpointer user_data)
 				       _("Etched in"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
 				       _("Etched out"));
-	gtk_container_add(GTK_CONTAINER(frame_type_alig), frame_type_comb);
+	COMPA_NO_STRETCH(&frame_type_alig, frame_type_comb);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(frame_type_comb),
 				 compa_data->frame_type);
 
 	/* Color buttons. */
 
 	label_col_but = gtk_color_button_new();
-	label_col_alig = gtk_alignment_new(0, 0, 0, 0);
-	gtk_container_add(GTK_CONTAINER(label_col_alig), label_col_but);
+	COMPA_NO_STRETCH(&label_col_alig, label_col_but);
 
 	if (compa_data->lab_col_str) {
 		gdk_color_parse(compa_data->lab_col_str, &lab_color);
@@ -470,8 +481,8 @@ config_dialog(GtkAction * action, gpointer user_data)
 	/* Table. */
 
 	conf_table = COMPA_TABLE_NEW(7, 3);
-	frame_alig = gtk_alignment_new(0, 0, 0, 0);
-	gtk_alignment_set_padding(GTK_ALIGNMENT(frame_alig), 5, 5, 5, 5);
+	COMPA_NO_STRETCH(&frame_alig, conf_table);
+	COMPA_ALIGNMENT_SET_PADDING(frame_alig, 5, 5, 5, 5);
 
 	/* Monitor command settings. */
 
@@ -515,7 +526,6 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 	content_area =
 	    gtk_dialog_get_content_area(GTK_DIALOG(compa_data->conf_dialog));
-	gtk_container_add(GTK_CONTAINER(frame_alig), conf_table);
 	gtk_container_add(GTK_CONTAINER(content_area), frame_alig);
 	gtk_widget_show_all(compa_data->conf_dialog);
 
@@ -550,11 +560,11 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 		compa_data->padding = gtk_spin_button_get_value_as_int(
 						GTK_SPIN_BUTTON(padding_spin));
-		gtk_alignment_set_padding(GTK_ALIGNMENT(compa_data->main_alig),
-					  compa_data->padding,
-					  compa_data->padding,
-					  compa_data->padding,
-					  compa_data->padding);
+		COMPA_ALIGNMENT_SET_PADDING(compa_data->main_alig,
+					    compa_data->padding,
+					    compa_data->padding,
+					    compa_data->padding,
+					    compa_data->padding);
 
 		/* Update colors. */
 
@@ -654,7 +664,7 @@ about_dialog(void)
 	gtk_show_about_dialog(NULL,
 			      "program-name", "Compa",
 			      "comments",
-			        _("Command Output Monitor Panel Applet"),
+				_("Command Output Monitor Panel Applet"),
 			      "version", VERSION,
 			      "copyright",
 				"Copyright \xC2\xA9 2010-2014 Ofer Kashayov, "
@@ -758,9 +768,7 @@ compa_init(MatePanelApplet * applet)
 			      GTK_JUSTIFY_CENTER);
 
 	/* Alignment. */
-	compa_data->main_alig = gtk_alignment_new(0, 0, 0, 0);
-	gtk_container_add(GTK_CONTAINER(compa_data->main_alig),
-	compa_data->main_label);
+	COMPA_NO_STRETCH(&compa_data->main_alig, compa_data->main_label);
 
 	/* Frame. */
 	compa_data->main_frame = gtk_frame_new(NULL);
@@ -799,9 +807,9 @@ compa_init(MatePanelApplet * applet)
 				  compa_data->frame_type);
 
 	/* Update padding. */
-	gtk_alignment_set_padding(GTK_ALIGNMENT(compa_data->main_alig),
-				  compa_data->padding, compa_data->padding,
-				  compa_data->padding, compa_data->padding);
+	COMPA_ALIGNMENT_SET_PADDING(compa_data->main_alig,
+				    compa_data->padding, compa_data->padding,
+				    compa_data->padding, compa_data->padding);
 
 	/* Update colors. */
 	if (compa_data->use_color) {
