@@ -78,6 +78,15 @@ typedef struct {
 #define COMPA_ALIGNMENT_SET_PADDING(widget, top, bottom, left, right)	\
 		gtk_alignment_set_padding(GTK_ALIGNMENT(widget), (top),	\
 					  (bottom), (left), (right))
+typedef GdkColor	compa_color;
+#define COMPA_COLOR_PARSE(color, spec)	gdk_color_parse((spec), (color))
+#define COMPA_COLOR_TO_STRING(color)	gdk_color_to_string(color)
+#define COMPA_COLOR_BUTTON_GET_COLOR(button, color)			\
+		gtk_color_button_get_color(GTK_COLOR_BUTTON(button), (color))
+#define COMPA_COLOR_BUTTON_SET_COLOR(button, color)			\
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(button), (color))
+#define COMPA_SET_BACKGROUND_COLOR(widget, state, color)		\
+		gtk_widget_modify_bg((widget), (state), (color))
 #else
 #define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
 		(gtk_label_set_xalign(GTK_LABEL(label), (xalign)),	\
@@ -102,6 +111,15 @@ typedef struct {
 		gtk_widget_set_margin_bottom((widget), (bottom)),	\
 		gtk_widget_set_margin_start((widget), (left)),		\
 		gtk_widget_set_margin_end((widget), (right))
+typedef GdkRGBA		compa_color;
+#define COMPA_COLOR_PARSE(color, spec)	gdk_rgba_parse((color), (spec))
+#define COMPA_COLOR_TO_STRING(color)	gdk_rgba_to_string(color)
+#define COMPA_COLOR_BUTTON_GET_COLOR(button, color)			\
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), (color))
+#define COMPA_COLOR_BUTTON_SET_COLOR(button, color)			\
+		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(button), (color))
+#define COMPA_SET_BACKGROUND_COLOR(widget, state, color)		\
+		gtk_widget_override_background_color((widget), (state), (color))
 #endif
 
 
@@ -367,7 +385,7 @@ config_dialog(GtkAction * action, gpointer user_data)
 	GtkWidget * label_col_alig;
 	GtkWidget * conf_table;
 	GtkWidget * frame_alig;
-	GdkColor lab_color;
+	compa_color lab_color;
 
 	if (compa_data->conf_dialog)
 		return;
@@ -469,9 +487,8 @@ config_dialog(GtkAction * action, gpointer user_data)
 	COMPA_NO_STRETCH(&label_col_alig, label_col_but);
 
 	if (compa_data->lab_col_str) {
-		gdk_color_parse(compa_data->lab_col_str, &lab_color);
-		gtk_color_button_set_color(
-		    GTK_COLOR_BUTTON(label_col_but), &lab_color);
+		COMPA_COLOR_PARSE(&lab_color, compa_data->lab_col_str);
+		COMPA_COLOR_BUTTON_SET_COLOR(label_col_but, &lab_color);
 		}
 
 	if (compa_data->use_color)
@@ -568,25 +585,25 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 		/* Update colors. */
 
-		gtk_color_button_get_color(GTK_COLOR_BUTTON(label_col_but),
-					   &lab_color);
+		COMPA_COLOR_BUTTON_GET_COLOR(label_col_but, &lab_color);
 
 		if (compa_data->lab_col_str)
 			free(compa_data->lab_col_str);
 
 		compa_data->lab_col_str =
-		    strdup(gdk_color_to_string(&lab_color));
+		    strdup(COMPA_COLOR_TO_STRING(&lab_color));
 
 		if (gtk_toggle_button_get_active(
 						GTK_TOGGLE_BUTTON(col_check))) {
 			compa_data->use_color = TRUE;
-			gtk_widget_modify_bg(GTK_WIDGET(compa_data->compa_ebox),
-					     GTK_STATE_NORMAL, &lab_color);
+			COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
+						   GTK_STATE_NORMAL,
+						   &lab_color);
 			}
 		else {
 			compa_data->use_color = FALSE;
-			gtk_widget_modify_bg(GTK_WIDGET(compa_data->compa_ebox),
-					     GTK_STATE_NORMAL, NULL);
+			COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
+						   GTK_STATE_NORMAL, NULL);
 			}
 
 		/* Update tooltip command. */
@@ -813,11 +830,11 @@ compa_init(MatePanelApplet * applet)
 
 	/* Update colors. */
 	if (compa_data->use_color) {
-		GdkColor lab_color;
+		compa_color lab_color;
 
-		gdk_color_parse(compa_data->lab_col_str, &lab_color);
-		gtk_widget_modify_bg(GTK_WIDGET(compa_data->compa_ebox),
-				     GTK_STATE_NORMAL, &lab_color);
+		COMPA_COLOR_PARSE(&lab_color, compa_data->lab_col_str);
+		COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
+					   GTK_STATE_NORMAL, &lab_color);
 		}
 }
 
