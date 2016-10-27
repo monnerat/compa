@@ -551,10 +551,10 @@ config_dialog(GtkAction * action, gpointer user_data)
 		/* Update monitor command. */
 
 		if (compa_data->monitor_cmd)
-			free(compa_data->monitor_cmd);
+			g_free(compa_data->monitor_cmd);
 
 		compa_data->monitor_cmd =
-		    strdup(gtk_entry_get_text(GTK_ENTRY(monitor_ent)));
+		    g_strdup(gtk_entry_get_text(GTK_ENTRY(monitor_ent)));
 
 		if (strlen(compa_data->monitor_cmd) < 1)
 			gtk_label_set_markup(GTK_LABEL(compa_data->main_label),
@@ -588,10 +588,9 @@ config_dialog(GtkAction * action, gpointer user_data)
 		COMPA_COLOR_BUTTON_GET_COLOR(label_col_but, &lab_color);
 
 		if (compa_data->lab_col_str)
-			free(compa_data->lab_col_str);
+			g_free(compa_data->lab_col_str);
 
-		compa_data->lab_col_str =
-		    strdup(COMPA_COLOR_TO_STRING(&lab_color));
+		compa_data->lab_col_str = COMPA_COLOR_TO_STRING(&lab_color);
 
 		if (gtk_toggle_button_get_active(
 						GTK_TOGGLE_BUTTON(col_check))) {
@@ -609,10 +608,10 @@ config_dialog(GtkAction * action, gpointer user_data)
 		/* Update tooltip command. */
 
 		if (compa_data->tooltip_cmd)
-			free(compa_data->tooltip_cmd);
+			g_free(compa_data->tooltip_cmd);
 
 		compa_data->tooltip_cmd =
-		    strdup(gtk_entry_get_text(GTK_ENTRY(tooltip_ent)));
+		    g_strdup(gtk_entry_get_text(GTK_ENTRY(tooltip_ent)));
 
 		if (strlen(compa_data->tooltip_cmd) < 1)
 			gtk_widget_set_tooltip_text(compa_data->compa_ebox, "");
@@ -620,10 +619,10 @@ config_dialog(GtkAction * action, gpointer user_data)
 		/* Update click command. */
 
 		if (compa_data->click_cmd)
-			free(compa_data->click_cmd);
+			g_free(compa_data->click_cmd);
 
 		compa_data->click_cmd =
-		    strdup(gtk_entry_get_text(GTK_ENTRY(action_ent)));
+		    g_strdup(gtk_entry_get_text(GTK_ENTRY(action_ent)));
 
 		/* Remove old monitor. */
 
@@ -811,7 +810,8 @@ compa_init(MatePanelApplet * applet)
 	load_config(compa_data);
 
 	/* Add monitor. */
-	if (compa_data->monitor_cmd > 0 && compa_data->update_int > 0) {
+	if (compa_data->monitor_cmd && compa_data->monitor_cmd[0] &&
+	    compa_data->update_int > 0) {
 		compa_data->active_mon =
 		    g_timeout_add_seconds(compa_data->update_int,
 					  (GSourceFunc) compa_update,
