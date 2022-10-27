@@ -46,7 +46,6 @@ typedef struct {
 	GtkWidget *	compa_ebox;	/* Event box */
 	GtkWidget *	conf_dialog;	/* Configure dialog */
 	GtkWidget *	main_frame;
-	GtkWidget *	main_alig;
 
 	gchar *		monitor_cmd;	/* Main command */
 	gint		update_int;	/* Update interval */
@@ -61,66 +60,6 @@ typedef struct {
 	gint		frame_type;	/* Frame shadow type */
 	gint		padding;
 }		compa_data_inst;
-
-
-#if GTK_MAJOR_VERSION < 3
-#define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
-		gtk_misc_set_alignment(GTK_MISC(label), (xalign), (yalign))
-#define COMPA_TABLE_NEW(rows, columns)					\
-		gtk_table_new((rows), (columns), FALSE)
-#define COMPA_TABLE_ATTACH(table, child, left, top)			\
-		gtk_table_attach(GTK_TABLE(table), (child),		\
-				 (left), (left) + 1, (top), (top) + 1,	\
-				 GTK_EXPAND | GTK_FILL, GTK_SHRINK, 2, 2)
-#define COMPA_NO_STRETCH(align, widget)					\
-		*(align) = gtk_alignment_new(0, 0, 0, 0),		\
-		gtk_container_add(GTK_CONTAINER(*(align)), (widget))
-#define COMPA_ALIGNMENT_SET_PADDING(widget, top, bottom, left, right)	\
-		gtk_alignment_set_padding(GTK_ALIGNMENT(widget), (top),	\
-					  (bottom), (left), (right))
-typedef GdkColor	compa_color;
-#define COMPA_COLOR_PARSE(color, spec)	gdk_color_parse((spec), (color))
-#define COMPA_COLOR_TO_STRING(color)	gdk_color_to_string(color)
-#define COMPA_COLOR_BUTTON_GET_COLOR(button, color)			\
-		gtk_color_button_get_color(GTK_COLOR_BUTTON(button), (color))
-#define COMPA_COLOR_BUTTON_SET_COLOR(button, color)			\
-		gtk_color_button_set_color(GTK_COLOR_BUTTON(button), (color))
-#define COMPA_SET_BACKGROUND_COLOR(widget, state, color)		\
-		gtk_widget_modify_bg((widget), (state), (color))
-#else
-#define COMPA_LABEL_ALIGN(label, xalign, yalign)			\
-		(gtk_label_set_xalign(GTK_LABEL(label), (xalign)),	\
-		 gtk_label_set_yalign(GTK_LABEL(label), (yalign)))
-#define COMPA_TABLE_NEW(rows, columns)					\
-		gtk_grid_new()
-#define COMPA_TABLE_ATTACH(table, child, left, top)			\
-		gtk_widget_set_margin_start((child), 2),		\
-		gtk_widget_set_margin_end((child), 2),			\
-		gtk_widget_set_margin_top((child), 2),			\
-		gtk_widget_set_margin_bottom((child), 2),		\
-		gtk_widget_set_hexpand((child), TRUE),			\
-		gtk_widget_set_vexpand((child), FALSE),			\
-		gtk_grid_attach(GTK_GRID(table), (child),		\
-				(left), (top), 1, 1)
-#define COMPA_NO_STRETCH(align, widget)					\
-		gtk_widget_set_halign((widget), GTK_ALIGN_START),	\
-		gtk_widget_set_valign((widget), GTK_ALIGN_START),	\
-		*(align) = (widget)
-#define COMPA_ALIGNMENT_SET_PADDING(widget, top, bottom, left, right)	\
-		gtk_widget_set_margin_top((widget), (top)),		\
-		gtk_widget_set_margin_bottom((widget), (bottom)),	\
-		gtk_widget_set_margin_start((widget), (left)),		\
-		gtk_widget_set_margin_end((widget), (right))
-typedef GdkRGBA		compa_color;
-#define COMPA_COLOR_PARSE(color, spec)	gdk_rgba_parse((color), (spec))
-#define COMPA_COLOR_TO_STRING(color)	gdk_rgba_to_string(color)
-#define COMPA_COLOR_BUTTON_GET_COLOR(button, color)			\
-		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), (color))
-#define COMPA_COLOR_BUTTON_SET_COLOR(button, color)			\
-		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(button), (color))
-#define COMPA_SET_BACKGROUND_COLOR(widget, state, color)		\
-		gtk_widget_override_background_color((widget), (state), (color))
-#endif
 
 
 /*
@@ -345,6 +284,38 @@ dialog_response(GtkWidget *dialog)
 }
 
 
+static GtkWidget *
+new_label(const gchar *str)
+{
+	GtkWidget *label = gtk_label_new(str);
+
+	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+	gtk_label_set_yalign(GTK_LABEL(label), 0.5);
+	return label;
+}
+
+static void
+grid_attach(GtkWidget *grid, GtkWidget *child, int left, int top)
+{
+	gtk_widget_set_margin_start(child, 2);
+	gtk_widget_set_margin_end(child, 2);
+	gtk_widget_set_margin_top(child, 2);
+	gtk_widget_set_margin_bottom(child, 2);
+	gtk_widget_set_hexpand(child, TRUE);
+	gtk_widget_set_vexpand(child, FALSE);
+	gtk_grid_attach(GTK_GRID(grid), child, left, top, 1, 1);
+}
+
+static void
+set_margins(GtkWidget *widget, int top, int bottom, int left, int right)
+{
+	gtk_widget_set_margin_top(widget, top);
+	gtk_widget_set_margin_bottom(widget, bottom);
+	gtk_widget_set_margin_start(widget, left);
+	gtk_widget_set_margin_end(widget, right);
+}
+
+
 /*
  *  Config dialog
  */
@@ -365,19 +336,14 @@ config_dialog(GtkAction *action, gpointer user_data)
 	GtkWidget *tooltip_ent;
 	GtkWidget *action_ent;
 	GtkWidget *interval_spin;
-	GtkWidget *interval_alig;
 	GtkWidget *padding_spin;
-	GtkWidget *padding_alig;
 	GtkWidget *monitor_browse_but;
 	GtkWidget *tooltip_browse_but;
 	GtkWidget *action_browse_but;
 	GtkWidget *frame_type_comb;
-	GtkWidget *frame_type_alig;
 	GtkWidget *label_col_but;
-	GtkWidget *label_col_alig;
-	GtkWidget *conf_table;
-	GtkWidget *frame_alig;
-	compa_color lab_color;
+	GtkWidget *conf_grid;
+	GdkRGBA lab_color;
 
 	if (compa_data->conf_dialog)
 		return;
@@ -398,18 +364,12 @@ config_dialog(GtkAction *action, gpointer user_data)
 
 	/* Labels. */
 
-	monitor_lab = gtk_label_new(_("Monitor command: "));
-	interval_lab = gtk_label_new(_("Interval (seconds): "));
-	tooltip_lab = gtk_label_new(_("Tooltip command: "));
-	action_lab = gtk_label_new(_("Click action: "));
-	frame_type_lab = gtk_label_new(_("Shadow type: "));
-	padding_lab = gtk_label_new(_("Padding: "));
-	COMPA_LABEL_ALIGN(monitor_lab, 0.0, 0.5);
-	COMPA_LABEL_ALIGN(interval_lab, 0.0, 0.5);
-	COMPA_LABEL_ALIGN(tooltip_lab, 0.0, 0.5);
-	COMPA_LABEL_ALIGN(action_lab, 0.0, 0.5);
-	COMPA_LABEL_ALIGN(frame_type_lab, 0.0, 0.5);
-	COMPA_LABEL_ALIGN(padding_lab, 0.0, 0.5);
+	monitor_lab = new_label(_("Monitor command: "));
+	interval_lab = new_label(_("Interval (seconds): "));
+	tooltip_lab = new_label(_("Tooltip command: "));
+	action_lab = new_label(_("Click action: "));
+	frame_type_lab = new_label(_("Shadow type: "));
+	padding_lab = new_label(_("Padding: "));
 
 	/* Check button. */
 
@@ -436,9 +396,11 @@ config_dialog(GtkAction *action, gpointer user_data)
 	/* Spin buttons. */
 
 	interval_spin = gtk_spin_button_new_with_range(1, 86400, 1);
+	gtk_widget_set_halign(interval_spin, GTK_ALIGN_START);
+	gtk_widget_set_valign(interval_spin, GTK_ALIGN_START);
 	padding_spin = gtk_spin_button_new_with_range(0, 10, 1);
-	COMPA_NO_STRETCH(&interval_alig, interval_spin);
-	COMPA_NO_STRETCH(&padding_alig, padding_spin);
+	gtk_widget_set_halign(padding_spin, GTK_ALIGN_START);
+	gtk_widget_set_valign(padding_spin, GTK_ALIGN_START);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(interval_spin),
 				  compa_data->update_int);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(padding_spin),
@@ -469,18 +431,21 @@ config_dialog(GtkAction *action, gpointer user_data)
 				       _("Etched in"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
 				       _("Etched out"));
-	COMPA_NO_STRETCH(&frame_type_alig, frame_type_comb);
+	gtk_widget_set_halign(frame_type_comb, GTK_ALIGN_START);
+	gtk_widget_set_valign(frame_type_comb, GTK_ALIGN_START);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(frame_type_comb),
 				 compa_data->frame_type);
 
 	/* Color buttons. */
 
 	label_col_but = gtk_color_button_new();
-	COMPA_NO_STRETCH(&label_col_alig, label_col_but);
+	gtk_widget_set_halign(label_col_but, GTK_ALIGN_START);
+	gtk_widget_set_valign(label_col_but, GTK_ALIGN_START);
 
 	if (compa_data->lab_col_str) {
-		COMPA_COLOR_PARSE(&lab_color, compa_data->lab_col_str);
-		COMPA_COLOR_BUTTON_SET_COLOR(label_col_but, &lab_color);
+		gdk_rgba_parse(&lab_color, compa_data->lab_col_str);
+		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(label_col_but),
+					   &lab_color);
 	}
 
 	if (compa_data->use_color)
@@ -489,53 +454,54 @@ config_dialog(GtkAction *action, gpointer user_data)
 
 	/* Table. */
 
-	conf_table = COMPA_TABLE_NEW(7, 3);
-	COMPA_NO_STRETCH(&frame_alig, conf_table);
-	COMPA_ALIGNMENT_SET_PADDING(frame_alig, 5, 5, 5, 5);
+	conf_grid = gtk_grid_new();
+	gtk_widget_set_halign(conf_grid, GTK_ALIGN_START);
+	gtk_widget_set_valign(conf_grid, GTK_ALIGN_START);
+	set_margins(conf_grid, 5, 5, 5, 5);
 
 	/* Monitor command settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, monitor_lab, 0, 0);
-	COMPA_TABLE_ATTACH(conf_table, monitor_ent, 1, 0);
-	COMPA_TABLE_ATTACH(conf_table, monitor_browse_but, 2, 0);
+	grid_attach(conf_grid, monitor_lab, 0, 0);
+	grid_attach(conf_grid, monitor_ent, 1, 0);
+	grid_attach(conf_grid, monitor_browse_but, 2, 0);
 
 	/* Interval settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, interval_lab, 0, 1);
-	COMPA_TABLE_ATTACH(conf_table, interval_alig, 1, 1);
+	grid_attach(conf_grid, interval_lab, 0, 1);
+	grid_attach(conf_grid, interval_spin, 1, 1);
 
 	/* Frame settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, frame_type_lab, 0, 2);
-	COMPA_TABLE_ATTACH(conf_table, frame_type_alig, 1, 2);
+	grid_attach(conf_grid, frame_type_lab, 0, 2);
+	grid_attach(conf_grid, frame_type_comb, 1, 2);
 
 	/* Padding settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, padding_lab, 0, 3);
-	COMPA_TABLE_ATTACH(conf_table, padding_alig, 1, 3);
+	grid_attach(conf_grid, padding_lab, 0, 3);
+	grid_attach(conf_grid, padding_spin, 1, 3);
 
 	/* Color settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, col_check, 0, 4);
-	COMPA_TABLE_ATTACH(conf_table, label_col_alig, 1, 4);
+	grid_attach(conf_grid, col_check, 0, 4);
+	grid_attach(conf_grid, label_col_but, 1, 4);
 
 	/* Tooltip settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, tooltip_lab, 0, 5);
-	COMPA_TABLE_ATTACH(conf_table, tooltip_ent, 1, 5);
-	COMPA_TABLE_ATTACH(conf_table, tooltip_browse_but, 2, 5);
+	grid_attach(conf_grid, tooltip_lab, 0, 5);
+	grid_attach(conf_grid, tooltip_ent, 1, 5);
+	grid_attach(conf_grid, tooltip_browse_but, 2, 5);
 
 	/* Action settings. */
 
-	COMPA_TABLE_ATTACH(conf_table, action_lab, 0, 6);
-	COMPA_TABLE_ATTACH(conf_table, action_ent, 1, 6);
-	COMPA_TABLE_ATTACH(conf_table, action_browse_but, 2, 6);
+	grid_attach(conf_grid, action_lab, 0, 6);
+	grid_attach(conf_grid, action_ent, 1, 6);
+	grid_attach(conf_grid, action_browse_but, 2, 6);
 
 	/* Display dialog. */
 
 	content_area =
 	    gtk_dialog_get_content_area(GTK_DIALOG(compa_data->conf_dialog));
-	gtk_container_add(GTK_CONTAINER(content_area), frame_alig);
+	gtk_container_add(GTK_CONTAINER(content_area), conf_grid);
 	gtk_widget_show_all(compa_data->conf_dialog);
 
 	if (gtk_dialog_run(GTK_DIALOG(compa_data->conf_dialog)) ==
@@ -569,32 +535,32 @@ config_dialog(GtkAction *action, gpointer user_data)
 
 		compa_data->padding = gtk_spin_button_get_value_as_int(
 						GTK_SPIN_BUTTON(padding_spin));
-		COMPA_ALIGNMENT_SET_PADDING(compa_data->main_alig,
-					    compa_data->padding,
-					    compa_data->padding,
-					    compa_data->padding,
-					    compa_data->padding);
+		set_margins(compa_data->main_label,
+			    compa_data->padding, compa_data->padding,
+			    compa_data->padding, compa_data->padding);
 
 		/* Update colors. */
 
-		COMPA_COLOR_BUTTON_GET_COLOR(label_col_but, &lab_color);
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(label_col_but),
+					   &lab_color);
 
 		if (compa_data->lab_col_str)
 			g_free(compa_data->lab_col_str);
 
-		compa_data->lab_col_str = COMPA_COLOR_TO_STRING(&lab_color);
+		compa_data->lab_col_str = gdk_rgba_to_string(&lab_color);
 
 		if (gtk_toggle_button_get_active(
 						GTK_TOGGLE_BUTTON(col_check))) {
 			compa_data->use_color = TRUE;
-			COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
-						   GTK_STATE_NORMAL,
-						   &lab_color);
+			gtk_widget_override_background_color(compa_data->compa_ebox,
+							     GTK_STATE_NORMAL,
+							     &lab_color);
 		}
 		else {
 			compa_data->use_color = FALSE;
-			COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
-						   GTK_STATE_NORMAL, NULL);
+			gtk_widget_override_background_color(compa_data->compa_ebox,
+							     GTK_STATE_NORMAL,
+							     NULL);
 		}
 
 		/* Update tooltip command. */
@@ -771,9 +737,8 @@ compa_init(MatePanelApplet *applet)
 	gtk_label_set_markup(GTK_LABEL(compa_data->main_label), DEFAULT_TEXT);
 	gtk_label_set_justify(GTK_LABEL(compa_data->main_label),
 			      GTK_JUSTIFY_CENTER);
-
-	/* Alignment. */
-	COMPA_NO_STRETCH(&compa_data->main_alig, compa_data->main_label);
+	gtk_widget_set_halign(compa_data->main_label, GTK_ALIGN_START);
+	gtk_widget_set_valign(compa_data->main_label, GTK_ALIGN_START);
 
 	/* Frame. */
 	compa_data->main_frame = gtk_frame_new(NULL);
@@ -788,7 +753,7 @@ compa_init(MatePanelApplet *applet)
 
 	/* Place widgets. */
 	gtk_container_add(GTK_CONTAINER(compa_data->compa_ebox),
-			  compa_data->main_alig);
+			  compa_data->main_label);
 	gtk_container_add(GTK_CONTAINER(compa_data->main_frame),
 			  compa_data->compa_ebox);
 	gtk_container_add(GTK_CONTAINER(compa_data->applet),
@@ -813,16 +778,16 @@ compa_init(MatePanelApplet *applet)
 				  compa_data->frame_type);
 
 	/* Update padding. */
-	COMPA_ALIGNMENT_SET_PADDING(compa_data->main_alig,
-				    compa_data->padding, compa_data->padding,
-				    compa_data->padding, compa_data->padding);
+	set_margins(compa_data->main_label,
+		    compa_data->padding, compa_data->padding,
+		    compa_data->padding, compa_data->padding);
 
 	/* Update colors. */
 	if (compa_data->use_color) {
-		compa_color lab_color;
+		GdkRGBA lab_color;
 
-		COMPA_COLOR_PARSE(&lab_color, compa_data->lab_col_str);
-		COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
+		gdk_rgba_parse(&lab_color, compa_data->lab_col_str);
+		gtk_widget_override_background_color(compa_data->compa_ebox,
 					   GTK_STATE_NORMAL, &lab_color);
 	}
 }
