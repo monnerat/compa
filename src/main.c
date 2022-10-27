@@ -1,7 +1,7 @@
 /*
  * compa - Command Output Monitor Panel Applet
  * Copyright (C) 2010-2014 Ofer Kashayov <oferkv@gmail.com>
- * Copyright (C) 2015-2016 Patrick Monnerat <patrick@monnerat.net>
+ * Copyright (C) 2015-2022 Patrick Monnerat <patrick@monnerat.net>
  *
  * compa is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -128,9 +128,8 @@ typedef GdkRGBA		compa_color;
  */
 
 gboolean
-action_click(GtkWidget * Widget, GdkEventButton * event,
-	     compa_data_inst * compa_data)
-
+action_click(GtkWidget *Widget, GdkEventButton *event,
+	     compa_data_inst *compa_data)
 {
 	if (event->type == GDK_BUTTON_PRESS)
 		if (event->button == 1) {
@@ -143,10 +142,10 @@ action_click(GtkWidget * Widget, GdkEventButton * event,
 
 				if (system(click_cmd_bg))
 					;			/* Ignore. */
-				}
+			}
 
 			return TRUE;
-			}
+		}
 
 	return FALSE;
 }
@@ -157,7 +156,7 @@ action_click(GtkWidget * Widget, GdkEventButton * event,
  */
 
 static void
-load_config(compa_data_inst * compa_data)
+load_config(compa_data_inst *compa_data)
 {
 	compa_data->monitor_cmd = g_settings_get_string(compa_data->gsettings,
 							"monitor-command");
@@ -183,8 +182,7 @@ load_config(compa_data_inst * compa_data)
  */
 
 static void
-save_config(compa_data_inst * compa_data)
-
+save_config(compa_data_inst *compa_data)
 {
 	g_settings_set_string(compa_data->gsettings,
 			      "monitor-command", compa_data->monitor_cmd);
@@ -211,11 +209,10 @@ save_config(compa_data_inst * compa_data)
  */
 
 void
-tooltip_update(compa_data_inst * compa_data)
-
+tooltip_update(compa_data_inst *compa_data)
 {
 	if (compa_data->tooltip_cmd && compa_data->tooltip_cmd[0]) {
-		FILE * cmd_pipe;
+		FILE *cmd_pipe;
 		unsigned int pipe_char;
 		gchar tooltip_cmd_out[FILENAME_MAX];
 		int i;
@@ -228,7 +225,7 @@ tooltip_update(compa_data_inst * compa_data)
 					break;
 
 				tooltip_cmd_out[i] = pipe_char;
-				}
+			}
 
 			if (tooltip_cmd_out[i - 1] == '\n')
 				tooltip_cmd_out[i - 1] = 0;
@@ -236,7 +233,7 @@ tooltip_update(compa_data_inst * compa_data)
 				tooltip_cmd_out[i] = 0;
 
 			(void) pclose(cmd_pipe);
-			}
+		}
 
 		/* Update label. */
 
@@ -245,7 +242,7 @@ tooltip_update(compa_data_inst * compa_data)
 
 		gtk_widget_set_tooltip_markup(compa_data->compa_ebox,
 					      tooltip_cmd_out);
-		}
+	}
 }
 
 
@@ -254,11 +251,10 @@ tooltip_update(compa_data_inst * compa_data)
  */
 
 static gboolean
-compa_update(compa_data_inst * compa_data)
-
+compa_update(compa_data_inst *compa_data)
 {
 	if (compa_data->monitor_cmd && compa_data->monitor_cmd[0]) {
-		FILE * cmd_pipe;
+		FILE *cmd_pipe;
 		unsigned int pipe_char;
 		gchar monitor_cmd_out[FILENAME_MAX];
 		int i;
@@ -271,7 +267,7 @@ compa_update(compa_data_inst * compa_data)
 					break;
 
 				monitor_cmd_out[i] = pipe_char;
-				}
+			}
 
 			while (i--)
 				if (monitor_cmd_out[i] != '\n' &&
@@ -280,7 +276,7 @@ compa_update(compa_data_inst * compa_data)
 
 			monitor_cmd_out[i + 1] = '\0';
 			(void) pclose(cmd_pipe);
-			}
+		}
 
 		/* Update label */
 
@@ -290,7 +286,7 @@ compa_update(compa_data_inst * compa_data)
 				     monitor_cmd_out);
 
 		return TRUE;
-		}
+	}
 	else
 		return FALSE;
 }
@@ -301,8 +297,7 @@ compa_update(compa_data_inst * compa_data)
  */
 
 static void
-compa_menu_update(GtkAction * action, gpointer user_data)
-
+compa_menu_update(GtkAction *action, gpointer user_data)
 {
 	compa_update((compa_data_inst *) user_data);
 }
@@ -313,8 +308,7 @@ compa_menu_update(GtkAction * action, gpointer user_data)
  */
 
 static void
-select_command(GtkWidget * text_ent)
-
+select_command(GtkWidget *text_ent)
 {
 	GtkWidget *dialog;
 
@@ -331,11 +325,11 @@ select_command(GtkWidget * text_ent)
 					    g_get_home_dir());
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-		const gchar * fn;
+		const gchar *fn;
 
 		fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		gtk_entry_set_text(GTK_ENTRY(text_ent), fn);
-		}
+	}
 
 	gtk_widget_destroy(dialog);
 }
@@ -345,8 +339,7 @@ select_command(GtkWidget * text_ent)
  */
 
 static void
-dialog_response(GtkWidget * dialog)
-
+dialog_response(GtkWidget *dialog)
 {
 	gtk_widget_hide(dialog);
 }
@@ -357,34 +350,33 @@ dialog_response(GtkWidget * dialog)
  */
 
 static void
-config_dialog(GtkAction * action, gpointer user_data)
-
+config_dialog(GtkAction *action, gpointer user_data)
 {
-	compa_data_inst * compa_data = user_data;
-	GtkWidget * content_area;
-	GtkWidget * monitor_lab;
-	GtkWidget * interval_lab;
-	GtkWidget * tooltip_lab;
-	GtkWidget * action_lab;
-	GtkWidget * frame_type_lab;
-	GtkWidget * padding_lab;
-	GtkWidget * col_check;
-	GtkWidget * monitor_ent;
-	GtkWidget * tooltip_ent;
-	GtkWidget * action_ent;
-	GtkWidget * interval_spin;
-	GtkWidget * interval_alig;
-	GtkWidget * padding_spin;
-	GtkWidget * padding_alig;
-	GtkWidget * monitor_browse_but;
-	GtkWidget * tooltip_browse_but;
-	GtkWidget * action_browse_but;
-	GtkWidget * frame_type_comb;
-	GtkWidget * frame_type_alig;
-	GtkWidget * label_col_but;
-	GtkWidget * label_col_alig;
-	GtkWidget * conf_table;
-	GtkWidget * frame_alig;
+	compa_data_inst *compa_data = user_data;
+	GtkWidget *content_area;
+	GtkWidget *monitor_lab;
+	GtkWidget *interval_lab;
+	GtkWidget *tooltip_lab;
+	GtkWidget *action_lab;
+	GtkWidget *frame_type_lab;
+	GtkWidget *padding_lab;
+	GtkWidget *col_check;
+	GtkWidget *monitor_ent;
+	GtkWidget *tooltip_ent;
+	GtkWidget *action_ent;
+	GtkWidget *interval_spin;
+	GtkWidget *interval_alig;
+	GtkWidget *padding_spin;
+	GtkWidget *padding_alig;
+	GtkWidget *monitor_browse_but;
+	GtkWidget *tooltip_browse_but;
+	GtkWidget *action_browse_but;
+	GtkWidget *frame_type_comb;
+	GtkWidget *frame_type_alig;
+	GtkWidget *label_col_but;
+	GtkWidget *label_col_alig;
+	GtkWidget *conf_table;
+	GtkWidget *frame_alig;
 	compa_color lab_color;
 
 	if (compa_data->conf_dialog)
@@ -489,7 +481,7 @@ config_dialog(GtkAction * action, gpointer user_data)
 	if (compa_data->lab_col_str) {
 		COMPA_COLOR_PARSE(&lab_color, compa_data->lab_col_str);
 		COMPA_COLOR_BUTTON_SET_COLOR(label_col_but, &lab_color);
-		}
+	}
 
 	if (compa_data->use_color)
 		gtk_toggle_button_set_active(
@@ -598,12 +590,12 @@ config_dialog(GtkAction * action, gpointer user_data)
 			COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
 						   GTK_STATE_NORMAL,
 						   &lab_color);
-			}
+		}
 		else {
 			compa_data->use_color = FALSE;
 			COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
 						   GTK_STATE_NORMAL, NULL);
-			}
+		}
 
 		/* Update tooltip command. */
 
@@ -638,12 +630,12 @@ config_dialog(GtkAction * action, gpointer user_data)
 						  (GSourceFunc) compa_update,
 						  compa_data);
 			compa_update(compa_data);
-			}
+		}
 
 		/* Save config. */
 
 		save_config(compa_data);
-		}
+	}
 
 	/* Remove dialog. */
 
@@ -658,18 +650,17 @@ config_dialog(GtkAction * action, gpointer user_data)
 
 static void
 about_dialog(void)
-
 {
 	static const char transcred[] = N_("translator-credits");
-	const char * translator = _(transcred);
+	const char *translator = _(transcred);
 
-	const gchar * authors[] = {
+	const gchar *authors[] = {
 		"Ofer Kashayov",
 		"Patrick Monnerat",
 		NULL
 	};
 
-	const gchar * artists[] = {
+	const gchar *artists[] = {
 		"Hava Saban",
 		NULL
 	};
@@ -684,7 +675,7 @@ about_dialog(void)
 			      "version", VERSION,
 			      "copyright",
 				"Copyright \xC2\xA9 2010-2014 Ofer Kashayov, "
-						   "2015 Patrick Monnerat",
+						   "2015-2022 Patrick Monnerat",
 			      "license", "GPLv3+",
 			      "logo-icon-name", "compa",
 			      "website", "https://github.com/monnerat/compa",
@@ -700,8 +691,7 @@ about_dialog(void)
  */
 
 static void
-compa_destroy(GtkWidget * widget, compa_data_inst * compa_data)
-
+compa_destroy(GtkWidget *widget, compa_data_inst *compa_data)
 {
 	/* Remove config dialog if active. */
 	if (compa_data->conf_dialog)
@@ -723,11 +713,10 @@ compa_destroy(GtkWidget * widget, compa_data_inst * compa_data)
  */
 
 static void
-compa_init(MatePanelApplet * applet)
-
+compa_init(MatePanelApplet *applet)
 {
-	GtkActionGroup * action_group;
-	compa_data_inst * compa_data;
+	GtkActionGroup *action_group;
+	compa_data_inst *compa_data;
 	static const char compa_menu[] =
 	    "   <menuitem name=\"update_item\" action=\"update_verb\" />"
 	    "   <menuitem name=\"configure_item\" action=\"configure_verb\" />"
@@ -817,7 +806,7 @@ compa_init(MatePanelApplet * applet)
 					  (GSourceFunc) compa_update,
 					  compa_data);
 		compa_update(compa_data);
-		}
+	}
 
 	/* Set frame type. */
 	gtk_frame_set_shadow_type(GTK_FRAME(compa_data->main_frame),
@@ -835,7 +824,7 @@ compa_init(MatePanelApplet * applet)
 		COMPA_COLOR_PARSE(&lab_color, compa_data->lab_col_str);
 		COMPA_SET_BACKGROUND_COLOR(compa_data->compa_ebox,
 					   GTK_STATE_NORMAL, &lab_color);
-		}
+	}
 }
 
 
@@ -844,8 +833,7 @@ compa_init(MatePanelApplet * applet)
  */
 
 static gboolean
-applet_factory(MatePanelApplet *applet, const gchar * iid, gpointer user_data)
-
+applet_factory(MatePanelApplet *applet, const gchar *iid, gpointer user_data)
 {
 	if (strcmp(iid, "compaApplet"))
 		return FALSE;
