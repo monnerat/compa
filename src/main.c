@@ -22,6 +22,7 @@
 #include <locale.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
+#include <cairo/cairo.h>
 #include <glib.h>
 #include <mate-panel-applet.h>
 #include <mate-panel-applet-gsettings.h>
@@ -144,6 +145,28 @@ save_config(compa_data_inst *compa_data)
 
 
 /*
+ *  Draw background
+ */
+
+gboolean
+draw_widget_background(GtkWidget *widget, cairo_t *cr, gpointer user_data)
+
+{
+	compa_data_inst * compa_data = (compa_data_inst *) user_data;
+	GdkRGBA lab_color;
+
+	if (compa_data->use_color) {
+		gdk_rgba_parse(&lab_color, compa_data->lab_col_str);
+		cairo_set_source_rgb(cr, lab_color.red,
+                                     lab_color.green, lab_color.blue);
+		cairo_paint(cr);
+		}
+
+	return FALSE;
+}
+
+
+/*
  *  Tooltip update
  */
 
@@ -175,7 +198,6 @@ tooltip_update(compa_data_inst *compa_data)
 		}
 
 		/* Update label. */
-
 		if (!strlen(tooltip_cmd_out))
 			sprintf(tooltip_cmd_out, ERROR_TEXT);
 
@@ -218,7 +240,6 @@ compa_update(compa_data_inst *compa_data)
 		}
 
 		/* Update label */
-
 		if (!strlen(monitor_cmd_out))
 			sprintf(monitor_cmd_out, ERROR_TEXT);
 		gtk_label_set_markup(GTK_LABEL(compa_data->main_label),
@@ -252,7 +273,6 @@ select_command(GtkWidget *text_ent)
 	GtkWidget *dialog;
 
 	/* Open file dialog. */
-
 	dialog = gtk_file_chooser_dialog_new(_("Select command"), NULL,
 					     GTK_FILE_CHOOSER_ACTION_OPEN,
 					     _("_Cancel"),
@@ -349,7 +369,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 		return;
 
 	/* Dialog. */
-
 	compa_data->conf_dialog =
 	    gtk_dialog_new_with_buttons(_("Configure"), NULL,
 					GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -363,7 +382,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 				 compa_data->conf_dialog);
 
 	/* Labels. */
-
 	monitor_lab = new_label(_("Monitor command: "));
 	interval_lab = new_label(_("Interval (seconds): "));
 	tooltip_lab = new_label(_("Tooltip command: "));
@@ -372,11 +390,9 @@ config_dialog(GtkAction *action, gpointer user_data)
 	padding_lab = new_label(_("Padding: "));
 
 	/* Check button. */
-
 	col_check = gtk_check_button_new_with_label(_("Label background: "));
 
 	/* Text entries. */
-
 	monitor_ent = gtk_entry_new();
 	tooltip_ent = gtk_entry_new();
 	action_ent = gtk_entry_new();
@@ -394,7 +410,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 				   compa_data->click_cmd);
 
 	/* Spin buttons. */
-
 	interval_spin = gtk_spin_button_new_with_range(1, 86400, 1);
 	gtk_widget_set_halign(interval_spin, GTK_ALIGN_START);
 	gtk_widget_set_valign(interval_spin, GTK_ALIGN_START);
@@ -407,7 +422,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 				  compa_data->padding);
 
 	/* Buttons. */
-
 	monitor_browse_but = gtk_button_new_with_label(_("Browse"));
 	tooltip_browse_but = gtk_button_new_with_label(_("Browse"));
 	action_browse_but = gtk_button_new_with_label(_("Browse"));
@@ -419,7 +433,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 				 G_CALLBACK(select_command), action_ent);
 
 	/* Combos. */
-
 	frame_type_comb = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(frame_type_comb),
 				       _("None"));
@@ -437,7 +450,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 				 compa_data->frame_type);
 
 	/* Color buttons. */
-
 	label_col_but = gtk_color_button_new();
 	gtk_widget_set_halign(label_col_but, GTK_ALIGN_START);
 	gtk_widget_set_valign(label_col_but, GTK_ALIGN_START);
@@ -452,53 +464,44 @@ config_dialog(GtkAction *action, gpointer user_data)
 		gtk_toggle_button_set_active(
 		    GTK_TOGGLE_BUTTON(col_check), TRUE);
 
-	/* Table. */
-
+	/* Grid. */
 	conf_grid = gtk_grid_new();
 	gtk_widget_set_halign(conf_grid, GTK_ALIGN_START);
 	gtk_widget_set_valign(conf_grid, GTK_ALIGN_START);
 	set_margins(conf_grid, 5, 5, 5, 5);
 
 	/* Monitor command settings. */
-
 	grid_attach(conf_grid, monitor_lab, 0, 0);
 	grid_attach(conf_grid, monitor_ent, 1, 0);
 	grid_attach(conf_grid, monitor_browse_but, 2, 0);
 
 	/* Interval settings. */
-
 	grid_attach(conf_grid, interval_lab, 0, 1);
 	grid_attach(conf_grid, interval_spin, 1, 1);
 
 	/* Frame settings. */
-
 	grid_attach(conf_grid, frame_type_lab, 0, 2);
 	grid_attach(conf_grid, frame_type_comb, 1, 2);
 
 	/* Padding settings. */
-
 	grid_attach(conf_grid, padding_lab, 0, 3);
 	grid_attach(conf_grid, padding_spin, 1, 3);
 
 	/* Color settings. */
-
 	grid_attach(conf_grid, col_check, 0, 4);
 	grid_attach(conf_grid, label_col_but, 1, 4);
 
 	/* Tooltip settings. */
-
 	grid_attach(conf_grid, tooltip_lab, 0, 5);
 	grid_attach(conf_grid, tooltip_ent, 1, 5);
 	grid_attach(conf_grid, tooltip_browse_but, 2, 5);
 
 	/* Action settings. */
-
 	grid_attach(conf_grid, action_lab, 0, 6);
 	grid_attach(conf_grid, action_ent, 1, 6);
 	grid_attach(conf_grid, action_browse_but, 2, 6);
 
 	/* Display dialog. */
-
 	content_area =
 	    gtk_dialog_get_content_area(GTK_DIALOG(compa_data->conf_dialog));
 	gtk_container_add(GTK_CONTAINER(content_area), conf_grid);
@@ -507,7 +510,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 	if (gtk_dialog_run(GTK_DIALOG(compa_data->conf_dialog)) ==
 	    GTK_RESPONSE_OK) {
 		/* Update monitor command. */
-
 		if (compa_data->monitor_cmd)
 			g_free(compa_data->monitor_cmd);
 
@@ -519,20 +521,17 @@ config_dialog(GtkAction *action, gpointer user_data)
 					     DEFAULT_TEXT);
 
 		/* Update interval. */
-
 		compa_data->update_int =
 		    gtk_spin_button_get_value_as_int(
 					GTK_SPIN_BUTTON(interval_spin));
 
 		/* Update frame type. */
-
 		compa_data->frame_type =
 		    gtk_combo_box_get_active(GTK_COMBO_BOX(frame_type_comb));
 		gtk_frame_set_shadow_type(GTK_FRAME(compa_data->main_frame),
 					  compa_data->frame_type);
 
 		/* Update padding. */
-
 		compa_data->padding = gtk_spin_button_get_value_as_int(
 						GTK_SPIN_BUTTON(padding_spin));
 		set_margins(compa_data->main_label,
@@ -540,7 +539,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 			    compa_data->padding, compa_data->padding);
 
 		/* Update colors. */
-
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(label_col_but),
 					   &lab_color);
 
@@ -548,23 +546,10 @@ config_dialog(GtkAction *action, gpointer user_data)
 			g_free(compa_data->lab_col_str);
 
 		compa_data->lab_col_str = gdk_rgba_to_string(&lab_color);
-
-		if (gtk_toggle_button_get_active(
-						GTK_TOGGLE_BUTTON(col_check))) {
-			compa_data->use_color = TRUE;
-			gtk_widget_override_background_color(compa_data->compa_ebox,
-							     GTK_STATE_NORMAL,
-							     &lab_color);
-		}
-		else {
-			compa_data->use_color = FALSE;
-			gtk_widget_override_background_color(compa_data->compa_ebox,
-							     GTK_STATE_NORMAL,
-							     NULL);
-		}
+		compa_data->use_color = gtk_toggle_button_get_active(
+						GTK_TOGGLE_BUTTON(col_check));
 
 		/* Update tooltip command. */
-
 		if (compa_data->tooltip_cmd)
 			g_free(compa_data->tooltip_cmd);
 
@@ -575,7 +560,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 			gtk_widget_set_tooltip_text(compa_data->compa_ebox, "");
 
 		/* Update click command. */
-
 		if (compa_data->click_cmd)
 			g_free(compa_data->click_cmd);
 
@@ -583,12 +567,10 @@ config_dialog(GtkAction *action, gpointer user_data)
 		    g_strdup(gtk_entry_get_text(GTK_ENTRY(action_ent)));
 
 		/* Remove old monitor. */
-
 		if (compa_data->active_mon)
 			g_source_remove(compa_data->active_mon);
 
 		/* Add new monitor. */
-
 		if (strlen(compa_data->monitor_cmd) > 0 &&
 		    compa_data->update_int > 0) {
 			compa_data->active_mon =
@@ -599,7 +581,6 @@ config_dialog(GtkAction *action, gpointer user_data)
 		}
 
 		/* Save config. */
-
 		save_config(compa_data);
 	}
 
@@ -747,6 +728,8 @@ compa_init(MatePanelApplet *applet)
 	compa_data->compa_ebox = gtk_event_box_new();
 	g_signal_connect(G_OBJECT(compa_data->compa_ebox), "button_press_event",
 			 G_CALLBACK(action_click), compa_data);
+	g_signal_connect(G_OBJECT(compa_data->compa_ebox), "draw",
+			 G_CALLBACK(draw_widget_background), compa_data);
 	g_signal_connect_swapped(G_OBJECT(compa_data->compa_ebox),
 				 "enter-notify-event",
 				 G_CALLBACK(tooltip_update), compa_data);
@@ -781,15 +764,6 @@ compa_init(MatePanelApplet *applet)
 	set_margins(compa_data->main_label,
 		    compa_data->padding, compa_data->padding,
 		    compa_data->padding, compa_data->padding);
-
-	/* Update colors. */
-	if (compa_data->use_color) {
-		GdkRGBA lab_color;
-
-		gdk_rgba_parse(&lab_color, compa_data->lab_col_str);
-		gtk_widget_override_background_color(compa_data->compa_ebox,
-					   GTK_STATE_NORMAL, &lab_color);
-	}
 }
 
 
