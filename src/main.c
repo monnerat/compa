@@ -618,18 +618,20 @@ compa_destroy(GtkWidget *widget, compa_t *p)
 
 
 /*
- *  Compa init
+ *  init_popup:
+ * This is isolated in a separate function to override necessary deprecated
+ * structures and calls.
  */
 static void
-compa_init(MatePanelApplet *applet)
+init_popup_menu(MatePanelApplet *applet, compa_t *p)
 {
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	GtkActionGroup *action_group;
-	compa_t *p;
-	static const char compa_menu[] =
+	static const char menu[] =
 	    "   <menuitem name=\"update_item\" action=\"update_verb\" />"
 	    "   <menuitem name=\"configure_item\" action=\"configure_verb\" />"
 	    "   <menuitem name=\"about_item\" action=\"about_verb\" />";
-	static const GtkActionEntry compa_verbs[] = {
+	static const GtkActionEntry verbs[] = {
 		{
 			"update_verb", GTK_STOCK_REFRESH, N_("_Update now"),
 			NULL, NULL, G_CALLBACK(compa_menu_update)
@@ -643,6 +645,24 @@ compa_init(MatePanelApplet *applet)
 			NULL, NULL, G_CALLBACK(about_dialog)
 		}
 	};
+
+	action_group = gtk_action_group_new(_("Compa Applet Actions"));
+	gtk_action_group_set_translation_domain(action_group, "compa");
+	gtk_action_group_add_actions(action_group, verbs,
+				     G_N_ELEMENTS(verbs), p);
+	mate_panel_applet_setup_menu(applet, menu, action_group);
+	g_object_unref(action_group);
+	G_GNUC_END_IGNORE_DEPRECATIONS
+}
+
+
+/*
+ *  Compa init
+ */
+static void
+compa_init(MatePanelApplet *applet)
+{
+	compa_t *p;
 
 	/* i18n. */
 	setlocale(LC_ALL, "");
@@ -666,13 +686,7 @@ compa_init(MatePanelApplet *applet)
 						COMPA_SCHEMA);
 
 	/* Popup menu. */
-	action_group = gtk_action_group_new(_("Compa Applet Actions"));
-	gtk_action_group_set_translation_domain(action_group, "compa");
-	gtk_action_group_add_actions(action_group, compa_verbs,
-				     G_N_ELEMENTS(compa_verbs), p);
-	mate_panel_applet_setup_menu(MATE_PANEL_APPLET(p->applet),
-				     compa_menu, action_group);
-	g_object_unref(action_group);
+	init_popup_menu(applet, p);
 
 	/* Label. */
 	p->main_label = gtk_label_new(NULL);
