@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2016 Patrick Monnerat
+# Copyright (C) YEAR Patrick Monnerat
 # This file is distributed under the same license as the compa package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: compa 0.99\n"
+"Project-Id-Version: compa 0.99.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-27 15:40+0100\n"
+"POT-Creation-Date: 2022-11-01 18:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Applet area background color"
+msgid "Applet area background color and transparency"
 msgstr ""
 
 msgid "Applet area left and right padding (#pixels)"
@@ -26,13 +26,19 @@ msgstr ""
 msgid "Applet area shadow type"
 msgstr ""
 
-msgid "Automatic update interval in seconds for the applet area"
+msgid "Applet text is markup"
+msgstr ""
+
+msgid "Automatic update period in seconds for the applet area"
 msgstr ""
 
 msgid "Background color"
 msgstr ""
 
-msgid "Browse"
+msgid "Background color: "
+msgstr ""
+
+msgid "Browse..."
 msgstr ""
 
 msgid "Click action: "
@@ -56,7 +62,7 @@ msgstr ""
 msgid "Compa Applet Actions"
 msgstr ""
 
-msgid "Configure"
+msgid "Compa configuration"
 msgstr ""
 
 msgid "Embossing"
@@ -68,19 +74,19 @@ msgstr ""
 msgid "Etched out"
 msgstr ""
 
+msgid "Frame type: "
+msgstr ""
+
 msgid "In"
-msgstr ""
-
-msgid "Interval (seconds): "
-msgstr ""
-
-msgid "Label background: "
 msgstr ""
 
 msgid "Monitor command"
 msgstr ""
 
 msgid "Monitor command: "
+msgstr ""
+
+msgid "Monitor markup"
 msgstr ""
 
 msgid "None"
@@ -95,13 +101,7 @@ msgstr ""
 msgid "Padding: "
 msgstr ""
 
-msgid "Paint applet area background"
-msgstr ""
-
 msgid "Select command"
-msgstr ""
-
-msgid "Shadow type: "
 msgstr ""
 
 msgid "Tooltip command"
@@ -110,10 +110,19 @@ msgstr ""
 msgid "Tooltip command: "
 msgstr ""
 
-msgid "Update interval (sec)"
+msgid "Tooltip markup"
 msgstr ""
 
-msgid "Use background color"
+msgid "Tooltip text is markup"
+msgstr ""
+
+msgid "Update period (sec)"
+msgstr ""
+
+msgid "Update period (seconds): "
+msgstr ""
+
+msgid "Use markup"
 msgstr ""
 
 msgid "_About"

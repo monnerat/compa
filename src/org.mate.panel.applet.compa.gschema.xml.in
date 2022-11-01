@@ -13,15 +13,25 @@
 			<summary>Monitor command</summary>
 			<description>Command producing text for the applet area</description>
 		</key>
-		<key name="update-interval" type="i">
+		<key name="monitor-markup" type="b">
+			<default>false</default>
+			<summary>Monitor markup</summary>
+			<description>Applet text is markup</description>
+		</key>
+		<key name="update-period" type="i">
 			<default>60</default>
-			<summary>Update interval (sec)</summary>
-			<description>Automatic update interval in seconds for the applet area</description>
+			<summary>Update period (sec)</summary>
+			<description>Automatic update period in seconds for the applet area</description>
 		</key>
 		<key name="tooltip-command" type="s">
 			<default>''</default>
 			<summary>Tooltip command</summary>
 			<description>Command producing text for the tootip</description>
+		</key>
+		<key name="tooltip-markup" type="b">
+			<default>false</default>
+			<summary>Tooltip markup</summary>
+			<description>Tooltip text is markup</description>
 		</key>
 		<key name="click-command" type="s">
 			<default>''</default>
@@ -34,19 +44,14 @@
 			<description>Applet area shadow type</description>
 		</key>
 		<key name="label-color" type="s">
-			<default>'#000000'</default>
+			<default>'#00000000'</default>
 			<summary>Background color</summary>
-			<description>Applet area background color</description>
+			<description>Applet area background color and transparency</description>
 		</key>
 		<key name="padding" type="i">
 			<default>0</default>
 			<summary>Padding</summary>
 			<description>Applet area left and right padding (#pixels)</description>
-		</key>
-		<key name="use-color" type="b">
-			<default>false</default>
-			<summary>Use background color</summary>
-			<description>Paint applet area background</description>
 		</key>
 	</schema>
 </schemalist>

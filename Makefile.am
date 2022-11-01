@@ -1,22 +1,23 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS =	foreign
+AUTOMAKE_OPTIONS	=	foreign
 
-SUBDIRS		=	src lang
+SUBDIRS			=	src lang
 
-ACLOCAL_AMFLAGS	=	-I m4
+ACLOCAL_AMFLAGS		=	-I m4
 
-doc_DATA	=	COPYING						\
-			AUTHORS						\
-			README						\
-			example.html					\
-			screenshot.png
+dist_doc_DATA		=	COPYING					\
+				AUTHORS					\
+				README					\
+				example.html				\
+				screenshot.png
 
 
-iconsdir	=	${datadir}/pixmaps
-icon		=	compa.png
-icons_DATA	=	$(icon)
+iconsdir		=	${datadir}/pixmaps
+icon			=	compa.png
+dist_icons_DATA		=	$(icon)
 
-EXTRA_DIST	=	${doc_DATA}					\
-			${icon}						\
-			compa.spec
+pkgdatadir		=	@PKGDATADIR@
+pkgdata_DATA		=	$(icon)
+
+EXTRA_DIST		=	compa.spec

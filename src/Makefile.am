@@ -1,12 +1,11 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CPPFLAGS		=						\
-	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" 	\
-	-DPACKAGE_SRC_DIR=\""$(srcdir)"\"				\
-	-DPACKAGE_DATA_DIR=\""$(datadir)"\"				\
-	$(COMPA_CFLAGS)
-
+AM_CPPFLAGS		=	$(COMPA_CFLAGS)
 AM_CFLAGS		=	-Wall -g
+
+if ENABLE_WERROR
+AM_CFLAGS		+=	-Werror
+endif
 
 panellibexecdir		=	@PANELLIBEXECDIR@
 
@@ -17,6 +16,10 @@ compa_applet_SOURCES	=	main.c
 compa_applet_LDFLAGS	=	-Wl,--export-dynamic
 
 compa_applet_LDADD	=	$(COMPA_LIBS)
+
+
+pkgdatadir		=	@PKGDATADIR@
+dist_pkgdata_DATA	=	compa.glade
 
 
 servicedir		=	@DBUS_SERVICES_DIR@
