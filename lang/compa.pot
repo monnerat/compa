@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: compa 0.99.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-01 18:00+0100\n"
+"POT-Creation-Date: 2022-11-05 18:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,10 +20,10 @@ msgstr ""
 msgid "Applet area background color and transparency"
 msgstr ""
 
-msgid "Applet area left and right padding (#pixels)"
+msgid "Applet area frame type"
 msgstr ""
 
-msgid "Applet area shadow type"
+msgid "Applet area left and right padding (#pixels)"
 msgstr ""
 
 msgid "Applet text is markup"
@@ -65,19 +65,28 @@ msgstr ""
 msgid "Compa configuration"
 msgstr ""
 
-msgid "Embossing"
-msgstr ""
-
 msgid "Etched in"
 msgstr ""
 
 msgid "Etched out"
 msgstr ""
 
+msgid "Frame fills the whole applet area"
+msgstr ""
+
+msgid "Frame is maximized"
+msgstr ""
+
+msgid "Frame type"
+msgstr ""
+
 msgid "Frame type: "
 msgstr ""
 
 msgid "In"
+msgstr ""
+
+msgid "Maximized"
 msgstr ""
 
 msgid "Monitor command"
@@ -99,6 +108,9 @@ msgid "Padding"
 msgstr ""
 
 msgid "Padding: "
+msgstr ""
+
+msgid "Plain"
 msgstr ""
 
 msgid "Select command"

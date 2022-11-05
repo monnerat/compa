@@ -6,6 +6,7 @@
 		<value nick="Out" value="2" />
 		<value nick="Etched in" value="3" />
 		<value nick="Etched out" value="4" />
+		<value nick="Plain" value="5" />
 	</enum>
 	<schema id="org.mate.panel.applet.compa">
 		<key name="monitor-command" type="s">
@@ -40,8 +41,13 @@
 		</key>
 		<key name="frame-type" enum="org.mate.panel.applet.compa.FrameType">
 			<default>'None'</default>
-			<summary>Embossing</summary>
-			<description>Applet area shadow type</description>
+			<summary>Frame type</summary>
+			<description>Applet area frame type</description>
+		</key>
+		<key name="frame-maximized" type="b">
+			<default>false</default>
+			<summary>Frame is maximized</summary>
+			<description>Frame fills the whole applet area</description>
 		</key>
 		<key name="label-color" type="s">
 			<default>'#00000000'</default>

@@ -40,33 +40,38 @@ Patrick Monnerat
     <property name="can-focus">False</property>
     <property name="icon-name">gtk-cancel</property>
   </object>
-  <object class="GtkFrame" id="compa_frame">
-    <property name="name">compa_eventbox</property>
+  <!-- n-columns=1 n-rows=1 -->
+  <object class="GtkGrid" id="compa_frame">
+    <property name="name">compa-frame</property>
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="label-xalign">0</property>
-    <property name="shadow-type">none</property>
+    <property name="halign">center</property>
+    <property name="valign">center</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
     <child>
       <object class="GtkEventBox" id="compa_eventbox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
         <signal name="button-press-event" handler="action_click" swapped="no"/>
-        <signal name="draw" handler="draw_widget_background" swapped="no"/>
         <signal name="enter-notify-event" handler="tooltip_update" swapped="yes"/>
         <child>
           <object class="GtkLabel" id="compa_label">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <property name="label">COMPA</property>
             <property name="justify">center</property>
           </object>
         </child>
       </object>
-    </child>
-    <child type="label_item">
-      <placeholder/>
+      <packing>
+        <property name="left-attach">0</property>
+        <property name="top-attach">0</property>
+      </packing>
     </child>
   </object>
   <object class="GtkAdjustment" id="interval_spin_adjustment">
@@ -327,7 +332,7 @@ Patrick Monnerat
               <object class="GtkComboBoxText" id="frame_type_combo">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Applet area shadow type</property>
+                <property name="tooltip-text" translatable="yes">Applet area frame type</property>
                 <property name="halign">start</property>
                 <property name="valign">start</property>
                 <property name="margin-start">2</property>
@@ -337,11 +342,12 @@ Patrick Monnerat
                 <property name="hexpand">True</property>
                 <property name="vexpand">False</property>
                 <items>
-                  <item id="GTK_SHADOW_NONE" translatable="yes">None</item>
-                  <item id="GTK_SHADOW_IN" translatable="yes">In</item>
-                  <item id="GTK_SHADOW_OUT" translatable="yes">Out</item>
-                  <item id="GTK_SHADOW_ETCHED_IN" translatable="yes">Etched in</item>
-                  <item id="GTK_SHADOW_ETCHED_OUT" translatable="yes">Etched out</item>
+                  <item id="0" translatable="yes">None</item>
+                  <item id="1" translatable="yes">In</item>
+                  <item id="2" translatable="yes">Out</item>
+                  <item id="3" translatable="yes">Etched in</item>
+                  <item id="4" translatable="yes">Etched out</item>
+                  <item id="5" translatable="yes">Plain</item>
                 </items>
               </object>
               <packing>
@@ -579,7 +585,27 @@ Patrick Monnerat
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkCheckButton" id="frame_maximized_check">
+                <property name="label" translatable="yes">Maximized</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">Frame fills the whole applet area</property>
+                <property name="halign">start</property>
+                <property name="margin-left">2</property>
+                <property name="margin-right">2</property>
+                <property name="margin-start">2</property>
+                <property name="margin-end">2</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <property name="hexpand">False</property>
+                <property name="vexpand">False</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">2</property>
+              </packing>
             </child>
             <child>
               <placeholder/>
