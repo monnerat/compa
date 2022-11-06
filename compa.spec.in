@@ -76,7 +76,6 @@ fi
 
 %defattr(-, root, root, -)
 %doc AUTHORS COPYING README
-%doc example.html screenshot.png
 %{_libexecdir}/mate-panel/*
 %{_datadir}/mate-panel/compa
 %{_datadir}/pixmaps/*
