@@ -17,14 +17,17 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_SETTINGS_ENABLE_BACKEND
+
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdarg.h>
 #include <locale.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
-#include <cairo/cairo.h>
 #include <glib.h>
+#include <gio/gsettingsbackend.h>
 #include <mate-panel-applet.h>
 #include <mate-panel-applet-gsettings.h>
 
@@ -41,11 +44,31 @@
 
 #define COMPA_SCHEMA	"org.mate.panel.applet.compa"
 
+#define fieldof(t, p, o)	*((t *) (((char *) (p)) + (o)))
+#define boolstring(b)		((b)? "true": "false")
+
+
+typedef struct {
+	gchar *			monitor_command;
+	gboolean		monitor_markup;
+	gint			update_period;	/* Seconds. */
+	gchar *			tooltip_command;
+	gboolean		tooltip_markup;
+	gchar *			click_command;
+	gchar *			background_color;
+	gint			frame_type;
+	gboolean		frame_maximized;
+	gint			padding;
+}		compa_config_t;
 
 typedef struct {
 	GtkWidget *		applet;		/* Panel applet. */
 	GSettings *		gsettings;	/* Configuration settings. */
 	GtkCssProvider *	frame_css;	/* CSS for applet "frame". */
+	guint			active_monitor;	/* Current active monitor. */
+	gchar *			command_dir;	/* Last command directory. */
+	gchar *			config_dir;	/* Last config directory. */
+	gchar *			config_file;	/* Last saved config file. */
 
 	/* Applet area widgets. */
 	GtkWidget *		compa_frame;
@@ -64,19 +87,14 @@ typedef struct {
 	GtkWidget *		tooltip_entry;
 	GtkWidget *		tooltip_markup_check;
 	GtkWidget *		action_entry;
+	GtkWidget *		file_chooser;
+	GtkWidget *		file_load_button;
+	GtkWidget *		file_save_button;
+	GtkWidget *		error_dialog;
+	GtkWidget *		error_label;
 
 	/* Configuration values. */
-	gchar *			monitor_command;
-	gboolean		monitor_markup;
-	gint			update_period;	/* Seconds. */
-	gchar *			tooltip_command;
-	gboolean		tooltip_markup;
-	gchar *			click_command;
-	gchar *			background_color;
-	guint			active_monitor;
-	gint			frame_type;
-	gboolean		frame_maximized;
-	gint			padding;
+	compa_config_t		config;
 }		compa_t;
 
 /*
@@ -101,6 +119,11 @@ static const struct {
 	IDENTRY(tooltip_entry),
 	IDENTRY(tooltip_markup_check),
 	IDENTRY(action_entry),
+	IDENTRY(file_chooser),
+	IDENTRY(file_load_button),
+	IDENTRY(file_save_button),
+	IDENTRY(error_dialog),
+	IDENTRY(error_label),
 	{NULL, 0}
 };
 
@@ -111,14 +134,16 @@ static const struct {
 gboolean
 action_click(GtkWidget *widget, GdkEventButton *event, compa_t *p)
 {
+	compa_config_t *config = &p->config;
+
 	(void) widget;
 
 	if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
-		if (p->click_command[0]) {
+		if (config->click_command[0]) {
 			char click_cmd_bg[FILENAME_MAX];
 
 			snprintf(click_cmd_bg, sizeof click_cmd_bg, "%s &",
-				 p->click_command);
+				 config->click_command);
 
 			if (system(click_cmd_bg))
 				;			/* Ignore. */
@@ -135,16 +160,16 @@ action_click(GtkWidget *widget, GdkEventButton *event, compa_t *p)
  * Free configuration data.
  */
 static void
-free_config(compa_t *p)
+free_config(compa_config_t *config)
 {
-	g_free(p->monitor_command);
-	g_free(p->tooltip_command);
-	g_free(p->click_command);
-	g_free(p->background_color);
-	p->monitor_command = NULL;
-	p->tooltip_command = NULL;
-	p->click_command = NULL;
-	p->background_color = NULL;
+	g_free(config->monitor_command);
+	g_free(config->tooltip_command);
+	g_free(config->click_command);
+	g_free(config->background_color);
+	config->monitor_command = NULL;
+	config->tooltip_command = NULL;
+	config->click_command = NULL;
+	config->background_color = NULL;
 }
 
 
@@ -152,20 +177,18 @@ free_config(compa_t *p)
  *  Load config
  */
 static void
-load_config(compa_t *p)
+load_config(compa_config_t *config, GSettings *g)
 {
-	GSettings *g = p->gsettings;
-
-	p->monitor_command = g_settings_get_string(g, "monitor-command");
-	p->monitor_markup = g_settings_get_boolean(g, "monitor-markup");
-	p->update_period = g_settings_get_int(g, "update-period");
-	p->tooltip_command = g_settings_get_string(g, "tooltip-command");
-	p->tooltip_markup = g_settings_get_boolean(g, "tooltip-markup");
-	p->click_command = g_settings_get_string(g, "click-command");
-	p->frame_type = g_settings_get_enum(g, "frame-type");
-	p->frame_maximized = g_settings_get_boolean(g, "frame-maximized");
-	p->padding = g_settings_get_int(g, "padding");
-	p->background_color = g_settings_get_string(g, "label-color");
+	config->monitor_command = g_settings_get_string(g, "monitor-command");
+	config->monitor_markup = g_settings_get_boolean(g, "monitor-markup");
+	config->update_period = g_settings_get_int(g, "update-period");
+	config->tooltip_command = g_settings_get_string(g, "tooltip-command");
+	config->tooltip_markup = g_settings_get_boolean(g, "tooltip-markup");
+	config->click_command = g_settings_get_string(g, "click-command");
+	config->frame_type = g_settings_get_enum(g, "frame-type");
+	config->frame_maximized = g_settings_get_boolean(g, "frame-maximized");
+	config->padding = g_settings_get_int(g, "padding");
+	config->background_color = g_settings_get_string(g, "label-color");
 }
 
 
@@ -173,20 +196,18 @@ load_config(compa_t *p)
  *  Save config
  */
 static void
-save_config(compa_t *p)
+commit_config(compa_config_t *config, GSettings *g)
 {
-	GSettings *g = p->gsettings;
-
-	g_settings_set_string(g, "monitor-command", p->monitor_command);
-	g_settings_set_boolean(g, "monitor-markup", p->monitor_markup);
-	g_settings_set_int(g, "update-period", p->update_period);
-	g_settings_set_string(g, "tooltip-command", p->tooltip_command);
-	g_settings_set_boolean(g, "tooltip-markup", p->tooltip_markup);
-	g_settings_set_string(g, "click-command", p->click_command);
-	g_settings_set_enum(g, "frame-type", p->frame_type);
-	g_settings_set_boolean(g, "frame-maximized", p->frame_maximized);
-	g_settings_set_int(g, "padding", p->padding);
-	g_settings_set_string(g, "label-color", p->background_color);
+	g_settings_set_string(g, "monitor-command", config->monitor_command);
+	g_settings_set_boolean(g, "monitor-markup", config->monitor_markup);
+	g_settings_set_int(g, "update-period", config->update_period);
+	g_settings_set_string(g, "tooltip-command", config->tooltip_command);
+	g_settings_set_boolean(g, "tooltip-markup", config->tooltip_markup);
+	g_settings_set_string(g, "click-command", config->click_command);
+	g_settings_set_enum(g, "frame-type", config->frame_type);
+	g_settings_set_boolean(g, "frame-maximized", config->frame_maximized);
+	g_settings_set_int(g, "padding", config->padding);
+	g_settings_set_string(g, "label-color", config->background_color);
 	g_settings_sync();
 }
 
@@ -197,14 +218,16 @@ save_config(compa_t *p)
 void
 tooltip_update(compa_t *p)
 {
-	if (p->tooltip_command[0]) {
-		gboolean markup = p->tooltip_markup;
+	compa_config_t *config = &p->config;
+
+	if (config->tooltip_command[0]) {
+		gboolean markup = config->tooltip_markup;
 		FILE *cmd_pipe;
 		unsigned int pipe_char;
 		gchar tooltip_cmd_out[FILENAME_MAX];
 		int i;
 
-		if ((cmd_pipe = popen(p->tooltip_command, "r"))) {
+		if ((cmd_pipe = popen(config->tooltip_command, "r"))) {
 			for (i = 0; i <= FILENAME_MAX; i++) {
 				pipe_char = getc(cmd_pipe);
 
@@ -247,19 +270,20 @@ tooltip_update(compa_t *p)
 static gboolean
 compa_update(compa_t *p)
 {
-	GtkAlign al = p->frame_maximized? GTK_ALIGN_FILL: GTK_ALIGN_CENTER;
+	compa_config_t *config = &p->config;
+	GtkAlign al = config->frame_maximized? GTK_ALIGN_FILL: GTK_ALIGN_CENTER;
 
 	gtk_widget_set_halign(p->compa_frame, al);
 	gtk_widget_set_valign(p->compa_frame, al);
 
-	if (p->monitor_command[0]) {
-		gboolean markup = p->monitor_markup;
+	if (config->monitor_command[0]) {
+		gboolean markup = config->monitor_markup;
 		FILE *cmd_pipe;
 		unsigned int pipe_char;
 		gchar monitor_cmd_out[FILENAME_MAX];
 		int i;
 
-		if ((cmd_pipe = popen(p->monitor_command, "r"))) {
+		if ((cmd_pipe = popen(config->monitor_command, "r"))) {
 			for (i = 0; i < sizeof monitor_cmd_out - 1; i++) {
 				pipe_char = getc(cmd_pipe);
 
@@ -311,34 +335,64 @@ compa_menu_update(GtkAction *action, gpointer user_data)
 }
 
 
+static gchar *
+run_file_chooser(compa_t *p, GtkFileChooserAction action, const char *title,
+		 char **path, char **basename)
+{
+	GtkFileChooser *fc = GTK_FILE_CHOOSER(p->file_chooser);
+	gchar *filename = NULL;
+
+	if (!*path)
+		*path = g_strdup(g_get_home_dir());
+
+	if (basename) {
+		if (!*basename)
+			*basename = g_strdup("untitled.compa");
+	}
+
+	gtk_file_chooser_set_action(fc, action);
+	gtk_window_set_title(GTK_WINDOW(fc), title);
+	gtk_file_chooser_set_current_folder(fc, *path);
+
+	gtk_widget_set_visible(p->file_load_button,
+			       action != GTK_FILE_CHOOSER_ACTION_SAVE);
+	gtk_widget_set_visible(p->file_save_button,
+			       action == GTK_FILE_CHOOSER_ACTION_SAVE);
+	if (basename)
+		gtk_file_chooser_set_current_name(fc, *basename);
+
+	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
+		filename = gtk_file_chooser_get_filename(fc);
+		g_free(*path);
+		*path = g_path_get_dirname(filename);
+		if (basename) {
+			g_free(*basename);
+			*basename = g_path_get_basename(filename);
+		}
+	}
+
+	gtk_widget_hide(p->file_chooser);
+	return filename;
+}
+
+
 /*
  *  File open
  */
 void
-select_command(GtkWidget *text_ent)
+select_command(GtkWidget *widget, compa_t *p)
 {
-	GtkWidget *dialog;
+	gchar *filename = run_file_chooser(p, GTK_FILE_CHOOSER_ACTION_OPEN,
+					   _("Select command"),
+					   &p->command_dir, NULL);
 
-	/* Open file dialog. */
-	dialog = gtk_file_chooser_dialog_new(_("Select command"), NULL,
-					     GTK_FILE_CHOOSER_ACTION_OPEN,
-					     _("_Cancel"),
-					     GTK_RESPONSE_CANCEL,
-					     _("_Open"),
-					     GTK_RESPONSE_ACCEPT,
-					     NULL);
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog),
-					    g_get_home_dir());
+	if (filename) {
+		gpointer text_entry = g_object_get_data(G_OBJECT(widget),
+							"compa-target");
 
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-		gchar *fn;
-
-		fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		gtk_entry_set_text(GTK_ENTRY(text_ent), fn);
-		g_free(fn);
+		gtk_entry_set_text(GTK_ENTRY(text_entry), filename);
+		g_free(filename);
 	}
-
-	gtk_widget_destroy(dialog);
 }
 
 /*
@@ -357,6 +411,7 @@ dialog_response(GtkWidget *dialog)
 static void
 handle_orientation(compa_t *p)
 {
+	compa_config_t *config = &p->config;
 	guint vertical = 1;
 
 	gtk_widget_set_margin_top(p->compa_frame, 1);
@@ -389,12 +444,12 @@ handle_orientation(compa_t *p)
 	}
 
 	if (vertical) {
-		gtk_widget_set_margin_top(p->compa_label, p->padding);
-		gtk_widget_set_margin_bottom(p->compa_label, p->padding);
+		gtk_widget_set_margin_top(p->compa_label, config->padding);
+		gtk_widget_set_margin_bottom(p->compa_label, config->padding);
 	}
 	else {
-		gtk_widget_set_margin_start(p->compa_label, p->padding);
-		gtk_widget_set_margin_end(p->compa_label, p->padding);
+		gtk_widget_set_margin_start(p->compa_label, config->padding);
+		gtk_widget_set_margin_end(p->compa_label, config->padding);
 	}
 }
 
@@ -406,6 +461,7 @@ handle_orientation(compa_t *p)
 static void
 applet_configure(compa_t *p)
 {
+	compa_config_t *config = &p->config;
 	gchar *css;
 
 	static gchar const frame_style_format[] =
@@ -439,8 +495,8 @@ applet_configure(compa_t *p)
 	gtk_widget_set_tooltip_text(p->compa_eventbox, "");
 
 	/* Update frame type and background. */
-	b = params + p->frame_type;
-	css = g_strdup_printf(frame_style_format, p->background_color,
+	b = params + config->frame_type;
+	css = g_strdup_printf(frame_style_format, config->background_color,
 			      b->border_color, b->border_width,
 			      b->border_style);
 	gtk_css_provider_load_from_data(p->frame_css, css, -1, NULL);
@@ -453,9 +509,9 @@ applet_configure(compa_t *p)
 	compa_update(p);
 
 	/* Add new monitor. */
-	if (p->monitor_command[0] && p->update_period)
+	if (config->monitor_command[0] && config->update_period)
 		p->active_monitor =
-		    g_timeout_add_seconds(p->update_period,
+		    g_timeout_add_seconds(config->update_period,
 					  (GSourceFunc) compa_update, p);
 }
 
@@ -466,29 +522,30 @@ applet_configure(compa_t *p)
 static void
 load_config_dialog_data(compa_t *p)
 {
+	compa_config_t *c = &p->config;
 	GdkRGBA color;
 
 	gtk_entry_set_text(GTK_ENTRY(p->monitor_entry),
-			   p->monitor_command? p->monitor_command: "");
+			   c->monitor_command? c->monitor_command: "");
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(p->monitor_markup_check),
-				     p->monitor_markup);
+				     c->monitor_markup);
 	gtk_entry_set_text(GTK_ENTRY(p->tooltip_entry),
-			   p->tooltip_command? p->tooltip_command: "");
+			   c->tooltip_command? c->tooltip_command: "");
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(p->tooltip_markup_check),
-				     p->tooltip_markup);
+				     c->tooltip_markup);
 	gtk_entry_set_text(GTK_ENTRY(p->action_entry),
-			   p->click_command? p->click_command: "");
+			   c->click_command? c->click_command: "");
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(p->period_spin),
-				  p->update_period);
+				  c->update_period);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(p->padding_spin),
-				  p->padding);
-	gdk_rgba_parse(&color, p->background_color);
+				  c->padding);
+	gdk_rgba_parse(&color, c->background_color);
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(p->label_color_button),
 				  &color);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(p->frame_type_combo),
-				 p->frame_type);
+				 c->frame_type);
 	gtk_toggle_button_set_active(
-	    GTK_TOGGLE_BUTTON(p->frame_maximized_check), p->frame_maximized);
+	    GTK_TOGGLE_BUTTON(p->frame_maximized_check), c->frame_maximized);
 }
 
 
@@ -496,46 +553,141 @@ load_config_dialog_data(compa_t *p)
  *  Retrieve configure dialog data.
  */
 static void
-retrieve_config_dialog_data(compa_t *p)
+retrieve_config_dialog_data(compa_t *p, compa_config_t *c)
 {
 	GdkRGBA color;
 
-	free_config(p);
+	free_config(c);
 
 	/* Retrieve monitor command. */
-	p->monitor_command = g_strdup(gtk_entry_get_text(
+	c->monitor_command = g_strdup(gtk_entry_get_text(
 				GTK_ENTRY(p->monitor_entry)));
-	p->monitor_markup = gtk_toggle_button_get_active(
+	c->monitor_markup = gtk_toggle_button_get_active(
 				GTK_TOGGLE_BUTTON(p->monitor_markup_check));
 
 	/* Retrieve update period. */
-	p->update_period = gtk_spin_button_get_value_as_int(
+	c->update_period = gtk_spin_button_get_value_as_int(
 				GTK_SPIN_BUTTON(p->period_spin));
 
 	/* Retrieve frame type. */
-	p->frame_type = gtk_combo_box_get_active(
+	c->frame_type = gtk_combo_box_get_active(
 				GTK_COMBO_BOX(p->frame_type_combo));
-	p->frame_maximized = gtk_toggle_button_get_active(
+	c->frame_maximized = gtk_toggle_button_get_active(
 				GTK_TOGGLE_BUTTON(p->frame_maximized_check));
 
 	/* Retrieve padding. */
-	p->padding = gtk_spin_button_get_value_as_int(
+	c->padding = gtk_spin_button_get_value_as_int(
 				GTK_SPIN_BUTTON(p->padding_spin));
 
 	/* Retrieve background color. */
 	gtk_color_chooser_get_rgba(
 		GTK_COLOR_CHOOSER(p->label_color_button), &color);
-	p->background_color = gdk_rgba_to_string(&color);
+	c->background_color = gdk_rgba_to_string(&color);
 
 	/* Retrieve tooltip command. */
-	p->tooltip_command = g_strdup(gtk_entry_get_text(
+	c->tooltip_command = g_strdup(gtk_entry_get_text(
 				GTK_ENTRY(p->tooltip_entry)));
-	p->tooltip_markup = gtk_toggle_button_get_active(
+	c->tooltip_markup = gtk_toggle_button_get_active(
 				GTK_TOGGLE_BUTTON(p->tooltip_markup_check));
 
 	/* Retrieve click command. */
-	p->click_command =
+	c->click_command =
 	     g_strdup(gtk_entry_get_text(GTK_ENTRY(p->action_entry)));
+}
+
+
+static void
+error(compa_t *p, const char *format, ...)
+{
+	gchar *text;
+	va_list args;
+
+	va_start(args, format);
+	text = g_strdup_vprintf(format, args);
+	va_end(args);
+
+	gtk_label_set_text(GTK_LABEL(p->error_label), text);
+	g_free(text);
+
+	gtk_dialog_run(GTK_DIALOG(p->error_dialog));
+	gtk_widget_hide(p->error_dialog);
+}
+
+
+GSettings *
+gsettings_file(const char *filename)
+{
+	GString *path = g_string_new("/");
+	GSettings *g = NULL;
+
+	g_string_append(path, COMPA_SCHEMA);
+	g_string_append(path, "/");
+	g_string_replace(path, ".", "/", 0);
+	GSettingsBackend *backend = g_keyfile_settings_backend_new(filename,
+	    path->str, "compa");
+
+	if (backend)
+		g = g_settings_new_with_backend_and_path(COMPA_SCHEMA,
+							 backend, path->str);
+
+	g_string_free(path, TRUE);
+	return g;
+}
+
+
+/*
+ * Load configuration from file.
+ */
+void
+load_pressed(compa_t *p)
+{
+	gchar *filename = run_file_chooser(p, GTK_FILE_CHOOSER_ACTION_OPEN,
+					   _("Load Compa configuration file"),
+					   &p->config_dir, NULL);
+
+	if (filename) {
+		GSettings *g = gsettings_file(filename);
+
+		if (!g)
+			error(p, _("Cannot load file `%s'"), filename);
+		else {
+			load_config(&p->config, g);
+			load_config_dialog_data(p);
+			g_object_unref(g);
+		}
+
+		g_free(filename);
+	}
+}
+
+
+/*
+ * Save configuration to file.
+ */
+void
+save_pressed(compa_t *p)
+{
+	gchar *filename = run_file_chooser(p, GTK_FILE_CHOOSER_ACTION_SAVE,
+					   _("Save Compa configuration file"),
+					   &p->config_dir, &p->config_file);
+
+	if (filename) {
+		GSettings *g = gsettings_file(filename);
+
+		if (!g)
+			error(p, _("Cannot save configuration to file `%s'"),
+			      filename);
+		else {
+			compa_config_t config;
+
+			memset(&config, 0, sizeof config);
+			retrieve_config_dialog_data(p, &config);
+			commit_config(&config, g);
+			g_object_unref(g);
+		}
+
+		g_free(filename);
+	}
 }
 
 
@@ -549,9 +701,9 @@ config_dialog(GtkAction *action, compa_t *p)
 
 	switch (gtk_dialog_run(GTK_DIALOG(p->configure_dialog))) {
 	case GTK_RESPONSE_OK:
-		retrieve_config_dialog_data(p);
+		retrieve_config_dialog_data(p, &p->config);
 		applet_configure(p);
-		save_config(p);
+		commit_config(&p->config, p->gsettings);
 		break;
 	default:
 		load_config_dialog_data(p);
@@ -607,9 +759,13 @@ about_dialog(void)
 static void
 compa_destroy(GtkWidget *widget, compa_t *p)
 {
-	/* Remove configure dialog. */
-	if (p->configure_dialog)
-		gtk_widget_destroy(p->configure_dialog);
+	/* Remove dialogs. */
+	gtk_widget_destroy(p->configure_dialog);
+	gtk_widget_destroy(p->error_dialog);
+	gtk_widget_destroy(p->file_chooser);
+	g_free(p->command_dir);
+	g_free(p->config_dir);
+	g_free(p->config_file);
 
 	/* Remove an existing monitor. */
 	if (p->active_monitor)
@@ -621,7 +777,7 @@ compa_destroy(GtkWidget *widget, compa_t *p)
 	/* Remove frame CSS. */
 	g_object_unref(p->frame_css);
 
-	free_config(p);
+	free_config(&p->config);
 	g_free(p);
 }
 
@@ -656,7 +812,7 @@ init_popup_menu(MatePanelApplet *applet, compa_t *p)
 	};
 
 	action_group = gtk_action_group_new(_("Compa Applet Actions"));
-	gtk_action_group_set_translation_domain(action_group, "compa");
+	gtk_action_group_set_translation_domain(action_group, PACKAGE_NAME);
 	gtk_action_group_add_actions(action_group, verbs,
 				     G_N_ELEMENTS(verbs), p);
 	mate_panel_applet_setup_menu(applet, menu, action_group);
@@ -678,9 +834,9 @@ configure_dialog_size_allocate(GtkWidget *dialog, GdkRectangle *allocation,
 	(void) user_data;
 
 	hints.min_width = 0;
-        hints.max_width = G_MAXINT;
-        hints.min_height = 0;
-        hints.max_height = 1;
+	hints.max_width = G_MAXINT;
+	hints.min_height = 0;
+	hints.max_height = 1;
 	gtk_window_set_geometry_hints(GTK_WINDOW (dialog), (GtkWidget *) NULL,
 				      &hints, (GdkWindowHints)
 				      (GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
@@ -700,10 +856,8 @@ compa_init(MatePanelApplet *applet)
 	size_t i;
 
 	/* i18n. */
-	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE_NAME, LOCALEDIR);
-	bind_textdomain_codeset(PACKAGE_NAME, "utf-8");
-	textdomain(PACKAGE_NAME);
+	bind_textdomain_codeset(PACKAGE_NAME, "UTF-8");
 
 	/* Init. */
 	g_set_application_name("Compa");
@@ -719,7 +873,7 @@ compa_init(MatePanelApplet *applet)
 						COMPA_SCHEMA);
 
 	/* Load config. */
-	load_config(p);
+	load_config(&p->config, p->gsettings);
 
 	/* GUI builder. */
 	builder = gtk_builder_new_from_file(PKGDATADIR "/compa.glade");
@@ -727,9 +881,20 @@ compa_init(MatePanelApplet *applet)
 
 	/* Identify widgets of interest. */
 	for (i = 0; idtable[i].id; i++) {
-		GtkWidget **w = (GtkWidget **) ((char *) p + idtable[i].offset);
+		GtkWidget **w = &fieldof(GtkWidget *, p, idtable[i].offset);
 		*w = GTK_WIDGET(gtk_builder_get_object(builder, idtable[i].id));
 	}
+
+	/* Attach custom data. */
+	g_object_set_data(gtk_builder_get_object(builder,
+						 "monitor_browse_button"),
+			  "compa-target", p->monitor_entry);
+	g_object_set_data(gtk_builder_get_object(builder,
+						 "tooltip_browse_button"),
+			  "compa-target", p->tooltip_entry);
+	g_object_set_data(gtk_builder_get_object(builder,
+						 "action_browse_button"),
+			  "compa-target", p->action_entry);
 
 	/* Set-up client area. */
 	mate_panel_applet_set_flags(MATE_PANEL_APPLET(p->applet),
@@ -775,6 +940,24 @@ applet_factory(MatePanelApplet *applet, const gchar *iid, gpointer user_data)
 }
 
 
+/*
+ * Dirty hack to force UTF-8 locale.
+ */
+#define MATE_PANEL_GETTEXT_DOMAIN	"mate-panel"
+
+#undef _MATE_PANEL_APPLET_SETUP_GETTEXT
+#define _MATE_PANEL_APPLET_SETUP_GETTEXT(out)				\
+	do { \
+		bindtextdomain (MATE_PANEL_GETTEXT_DOMAIN, MATELOCALEDIR); \
+		bind_textdomain_codeset (MATE_PANEL_GETTEXT_DOMAIN, "UTF-8"); \
+		if (out) {						\
+			setlocale(LC_ALL, "");				\
+			textdomain (MATE_PANEL_GETTEXT_DOMAIN);		\
+		}							\
+	} while (0)
+
+
+/* Main program. */
 MATE_PANEL_APPLET_OUT_PROCESS_FACTORY(
 	"compaAppletFactory",
 	PANEL_TYPE_APPLET,

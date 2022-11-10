@@ -50,7 +50,7 @@
 			<description>Frame fills the whole applet area</description>
 		</key>
 		<key name="label-color" type="s">
-			<default>'#00000000'</default>
+			<default>'rgba(0,0,0,0)'</default>
 			<summary>Background color</summary>
 			<description>Applet area background color and transparency</description>
 		</key>

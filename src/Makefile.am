@@ -1,6 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CPPFLAGS		=	$(COMPA_CFLAGS)
+AM_CPPFLAGS		=	-DMATELOCALEDIR=\"${datadir}/locale\"	\
+				$(COMPA_CFLAGS)
 AM_CFLAGS		=	-Wall -g
 
 if ENABLE_WERROR

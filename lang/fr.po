@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: compa 0.99.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-05 17:47+0100\n"
-"PO-Revision-Date: 2022-11-05 19:53+0100\n"
+"POT-Creation-Date: 2022-11-09 02:31+0100\n"
+"PO-Revision-Date: 2022-11-09 02:18+0100\n"
 "Last-Translator: Patrick Monnerat\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -42,6 +42,14 @@ msgstr "Couleur de fond: "
 msgid "Browse..."
 msgstr "Naviguer..."
 
+#, c-format
+msgid "Cannot load file `%s'"
+msgstr "Impossible de charger le fichier `%s'"
+
+#, c-format
+msgid "Cannot save configuration to file `%s'"
+msgstr "Impossible de sauvegarder la configuration dans le fichier `%s'"
+
 msgid "Click action: "
 msgstr "Action sur clic: "
 
@@ -66,6 +74,9 @@ msgstr "Actions sur l'appliquette Compa"
 msgid "Compa configuration"
 msgstr "Configuration de Compa"
 
+msgid "Error"
+msgstr "Erreur"
+
 msgid "Etched in"
 msgstr "Bord en creux"
 
@@ -86,6 +97,9 @@ msgstr "Type de cadre: "
 
 msgid "In"
 msgstr "En creux"
+
+msgid "Load Compa configuration file"
+msgstr "Charger un fichier de configuration Compa"
 
 msgid "Maximized"
 msgstr "Maximisé"
@@ -114,6 +128,9 @@ msgstr "Remplissage: "
 msgid "Plain"
 msgstr "Simple"
 
+msgid "Save Compa configuration file"
+msgstr "Sélectionner un ficher de configuration Compa"
+
 msgid "Select command"
 msgstr "Sélectionner une commande"
 
@@ -128,6 +145,9 @@ msgstr "Balisage de l'infobulle"
 
 msgid "Tooltip text is markup"
 msgstr "Le texte de l'infobulle est balisé"
+
+msgid "Type-in a command"
+msgstr "Saisir une commande"
 
 msgid "Update period (sec)"
 msgstr "Période de mise à jour (sec)"
@@ -144,14 +164,26 @@ msgstr "_A propos"
 msgid "_Cancel"
 msgstr "_Annuler"
 
+msgid "_Close"
+msgstr "_Fermer"
+
 msgid "_Configure"
 msgstr "_Configurer"
+
+msgid "_Load..."
+msgstr "_Charger"
 
 msgid "_OK"
 msgstr "_Valider"
 
-msgid "_Open"
-msgstr "_Ouvrir"
+msgid "_Pick"
+msgstr "_Choisir"
+
+msgid "_Save"
+msgstr "_Sauvegarder"
+
+msgid "_Save..."
+msgstr "_Sauvegarder..."
 
 msgid "_Update now"
 msgstr "_Mettre à jour maintenant"
